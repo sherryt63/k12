@@ -98,9 +98,9 @@ app.get('/api/score-summary', (req, res) => {
         }
 
         let query = `
-            SELECT 
-                MAX(score) AS max_score, 
-                MIN(score) AS min_score, 
+            SELECT
+                MAX(score) AS max_score,
+                MIN(score) AS min_score,
                 AVG(score) AS avg_score
             FROM grade
             WHERE school_no IN (?)
@@ -138,9 +138,9 @@ app.get('/api/score-summary', (req, res) => {
 
                 // 获取中位数
                 let medianQuery = `
-                    SELECT score FROM grade 
+                    SELECT score FROM grade
                     WHERE school_no IN (?) ${analysisType === '1' ? 'AND class_no IN (?)' : ''}
-                    ORDER BY score 
+                    ORDER BY score
                     LIMIT 1 OFFSET ?
                 `;
                 db.query(medianQuery, [...params, medianOffset], (err, medianResults) => {
@@ -153,9 +153,9 @@ app.get('/api/score-summary', (req, res) => {
 
                     // 获取四分位数
                     let q1Query = `
-                        SELECT score FROM grade 
+                        SELECT score FROM grade
                         WHERE school_no IN (?) ${analysisType === '1' ? 'AND class_no IN (?)' : ''}
-                        ORDER BY score 
+                        ORDER BY score
                         LIMIT 1 OFFSET ?
                     `;
                     db.query(q1Query, [...params, q1Offset], (err, q1Results) => {
@@ -167,9 +167,9 @@ app.get('/api/score-summary', (req, res) => {
                         summary.q1_score = q1Results[0].score;
 
                         let q3Query = `
-                            SELECT score FROM grade 
+                            SELECT score FROM grade
                             WHERE school_no IN (?) ${analysisType === '1' ? 'AND class_no IN (?)' : ''}
-                            ORDER BY score 
+                            ORDER BY score
                             LIMIT 1 OFFSET ?
                         `;
                         db.query(q3Query, [...params, q3Offset], (err, q3Results) => {
@@ -314,9 +314,9 @@ app.get('/api/admin-score-summary', (req, res) => {
 
     // Query for max, min, avg scores
     const summaryQuery = `
-        SELECT 
-            MAX(score) AS max_score, 
-            MIN(score) AS min_score, 
+        SELECT
+            MAX(score) AS max_score,
+            MIN(score) AS min_score,
             AVG(score) AS avg_score
         FROM gradeHave
         WHERE school_no = ? AND class_no = ?
@@ -348,11 +348,11 @@ app.get('/api/admin-score-summary', (req, res) => {
 
             // Query for median
             const medianQuery = `
-                SELECT score 
-                FROM gradeHave 
-                WHERE school_no = ? AND class_no = ? 
-                ORDER BY score 
-                LIMIT 1 
+                SELECT score
+                FROM gradeHave
+                WHERE school_no = ? AND class_no = ?
+                ORDER BY score
+                LIMIT 1
                 OFFSET ?
             `;
 
@@ -366,11 +366,11 @@ app.get('/api/admin-score-summary', (req, res) => {
 
                 // Query for Q1
                 const q1Query = `
-                    SELECT score 
-                    FROM gradeHave 
-                    WHERE school_no = ? AND class_no = ? 
-                    ORDER BY score 
-                    LIMIT 1 
+                    SELECT score
+                    FROM gradeHave
+                    WHERE school_no = ? AND class_no = ?
+                    ORDER BY score
+                    LIMIT 1
                     OFFSET ?
                 `;
 
@@ -384,11 +384,11 @@ app.get('/api/admin-score-summary', (req, res) => {
 
                     // Query for Q3
                     const q3Query = `
-                        SELECT score 
-                        FROM gradeHave 
-                        WHERE school_no = ? AND class_no = ? 
-                        ORDER BY score 
-                        LIMIT 1 
+                        SELECT score
+                        FROM gradeHave
+                        WHERE school_no = ? AND class_no = ?
+                        ORDER BY score
+                        LIMIT 1
                         OFFSET ?
                     `;
 
@@ -654,8 +654,6 @@ app.get('/api/admin-scores', (req, res) => {
         });
     });
 });
-
-
 
 app.get('/api/question', (req, res) => {
     const { question } = req.query;
@@ -951,6 +949,24 @@ app.get('/part2_1/filter', (req, res) => {
     });
 });
 
+// 获取所有的 school_no 和 class_no 组合
+app.get('/part2_1/classes', (req, res) => {
+    const sql = 'SELECT DISTINCT school_no, class_no FROM part2_1';
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error('获取班级数据失败:', err);
+            res.status(500).send('服务器错误');
+            return;
+        }
+        const classOptions = results.map(row => ({
+            value: `${row.school_no}&${row.class_no}`,
+            text: `school_no: ${row.school_no}, class_no: ${row.class_no}`
+        }));
+        res.send(classOptions);
+    });
+});
+
+
 // 获取所有数据，供管理员使用
 app.get('/part2_1/all', (req, res) => {
     const sql = `
@@ -1117,24 +1133,6 @@ app.get('/part2_9/filter', (req, res) => {
     });
 });
 
-// 获取教师权限
-app.get('/teacher/:username', (req, res) => {
-    const username = req.params.username;
-    const sql = 'SELECT permission FROM teacher WHERE name = ?';
-    db.query(sql, [username], (err, result) => {
-        if (err) {
-            console.error('获取教师数据失败:', err);
-            res.status(500).send('服务器错误');
-            return;
-        }
-        if (result.length > 0) {
-            res.send(result[0]);
-        } else {
-            res.status(404).send('not found');
-        }
-    });
-});
-
 // 获取所有数据，供管理员使用
 app.get('/part2_9/all', (req, res) => {
     const sql = `
@@ -1161,6 +1159,37 @@ app.get('/part2_9/all', (req, res) => {
     });
 });
 
+
+// 获取教师权限
+app.get('/teacher/:username', (req, res) => {
+    const username = req.params.username;
+    const sql = 'SELECT permission FROM teacher WHERE name = ?';
+    db.query(sql, [username], (err, result) => {
+        if (err) {
+            console.error('获取教师数据失败:', err);
+            res.status(500).send('服务器错误');
+            return;
+        }
+        if (result.length > 0) {
+            res.send(result[0]);
+        } else {
+            res.status(404).send('not found');
+        }
+    });
+});
+
+// 获取所有的 school_no 和 class_no 组合
+app.get('/part2_9/classes', (req, res) => {
+    const sql = 'SELECT DISTINCT school_no, class_no FROM part2_9';
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error('获取班级数据失败:', err);
+            res.status(500).send('服务器错误');
+            return;
+        }
+        res.send(results);
+    });
+});
 
 // 获取学生数据
 app.get('/part2_9/:username', (req, res) => {
@@ -1205,3 +1234,5 @@ app.get('/part2_9/average/:school_no/:class_no', (req, res) => {
 app.listen(3000, () => {
     console.log('服务器运行在 http://localhost:3000');
 });
+
+

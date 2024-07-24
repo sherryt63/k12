@@ -27,14 +27,12 @@
 
     <!-- 教师视图 -->
     <div v-else-if="isTeacher || isAdmin">
-      <div v-if="isTeacher">
         <div>
           <h2>班级筛选：</h2>
           <select v-model="selectedClass" @change="fetchFilteredData">
             <option v-for="option in classOptions" :key="option.value" :value="option.value">{{ option.text }}</option>
           </select>
         </div>
-      </div>
       <div>
         <h2>学生得分均分：{{ studentAverage }}</h2>
       </div>
@@ -61,6 +59,7 @@
     </div>
 </template>
 
+
 <script>
 import axios from 'axios';
 import { ref, onMounted, watch } from 'vue';
@@ -84,18 +83,14 @@ export default {
     const isStudent = props.permission === 1;
     const isTeacher = props.permission === 0;
     const isAdmin = props.permission === 2;
-    // const partImage = require('public/images/PART2_1.png');
+
     const studentImage = ref(null);
     const studentScore = ref(null);
     const peerAverage = ref(null);
     const studentAverage = ref(null);
     const classOptions = ref([]);
     const selectedClass = ref('');
-    const selectedClassInfo = ref(null);
-    // const typicalError1 = require('public/images/1.png');
-    // const typicalError2 = require('public/images/2.png');
-    // const typicalError3 = require('public/images/3.png');
-    // const typicalError4 = require('public/images/4.png');
+    const selectedClassInfo = ref({ school_no: '', class_no: '' });
     let chartInstance = null;
 
     onMounted(async () => {
@@ -142,7 +137,15 @@ export default {
         }
       } else if (isTeacher || isAdmin) {
         try {
-          if (isTeacher) {
+          if (isAdmin) {
+            const { data: classData } = await axios.get('http://localhost:3000/part2_1/classes');
+            classOptions.value = classData;
+            selectedClass.value = classData.length ? classData[0].value : '';
+            selectedClassInfo.value = {
+              school_no: classData.length ? classData[0].value.split('&')[0] : '',
+              class_no: classData.length ? classData[0].value.split('&')[1] : ''
+            };
+          } else if (isTeacher) {
             const { data: teacherData } = await axios.get(`http://localhost:3000/teacher/${props.userName}`);
             const permissions = teacherData.permission.split(',');
 
@@ -163,29 +166,45 @@ export default {
               class_no: options[0].value.split('&')[1]
             };
           }
-
           fetchFilteredData();
         } catch (error) {
-          console.error('Failed to fetch teacher data:', error);
+          console.error('Failed to fetch data:', error);
         }
       }
     });
 
     watch(selectedClass, (newClass) => {
-      if (isTeacher) {
-        const parts = newClass.split('&');
-        selectedClassInfo.value = {
-          school_no: parts[0],
-          class_no: parts[1]
-        };
-        fetchFilteredData();
+      if (isAdmin) {
+        if (newClass) {
+          const parts = newClass.split('&');
+          selectedClassInfo.value = {
+            school_no: parts[0] || '',
+            class_no: parts[1] || ''
+          };
+          fetchFilteredData();
+        }
+      } else if (isTeacher) {
+        // 如果教师端可以选择班级并更新 selectedClassInfo
+        if (newClass) {
+          const parts = newClass.split('&');
+          selectedClassInfo.value = {
+            school_no: parts[0] || '',
+            class_no: parts[1] || ''
+          };
+          fetchFilteredData();
+        }
       }
     });
 
     const fetchFilteredData = async () => {
+      if (!selectedClassInfo.value.school_no || !selectedClassInfo.value.class_no) {
+        console.error('Class information is not available.');
+        return;
+      }
+
       try {
-        const { data: filteredData } = await axios.get(isAdmin ? 'http://localhost:3000/part2_1/all' : 'http://localhost:3000/part2_1/filter', {
-          params: isAdmin ? {} : {
+        const { data: filteredData } = await axios.get('http://localhost:3000/part2_1/filter', {
+          params: {
             school_no: selectedClassInfo.value.school_no,
             class_no: selectedClassInfo.value.class_no
           }
@@ -239,7 +258,6 @@ export default {
       isStudent,
       isTeacher,
       isAdmin,
-      // partImage,
       studentImage,
       studentScore,
       peerAverage,
@@ -247,12 +265,10 @@ export default {
       classOptions,
       selectedClass,
       selectedClassInfo,
-      // typicalError1,
-      // typicalError2,
-      // typicalError3,
-      // typicalError4,
       fetchFilteredData
     };
   }
 };
 </script>
+
+

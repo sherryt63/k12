@@ -24,7 +24,7 @@
 
 
     <div class="images">
-      <img src="public/images/title.png" alt="Image 0" />
+      <img src="/images/paper_title.png" alt="Image 0" />
     </div>
 
     <div id="score-summary" class="chart-container"></div>

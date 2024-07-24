@@ -38,7 +38,7 @@
     </div>
 
     <div v-if="isTeacher || isAdmin">
-      <div v-if="isTeacher">
+      <div v-if="isTeacher || isAdmin">
         <h2>选择班级：</h2>
         <select v-model="selectedClass" @change="fetchFilteredData">
           <option v-for="option in classOptions" :key="option.value" :value="option.value">{{ option.text }}</option>
@@ -115,7 +115,7 @@ export default {
       } else if (isTeacher) {
         fetchTeacherData();
       } else if (isAdmin) {
-        fetchAllData();
+        fetchAllClasses();
       }
     });
 
@@ -150,6 +150,20 @@ export default {
       }
     };
 
+    const fetchAllClasses = async () => {
+      try {
+        const { data: classes } = await axios.get('http://localhost:3000/part2_9/classes');
+        classOptions.value = classes.map(cls => ({
+          value: `${cls.school_no}&${cls.class_no}`,
+          text: `school_no: ${cls.school_no}, class_no: ${cls.class_no}`
+        }));
+        selectedClass.value = classOptions.value[0].value;
+        fetchFilteredData(); // Fetch data for the default selected class
+      } catch (error) {
+        console.error('Failed to fetch classes:', error);
+      }
+    };
+
     const fetchPeerAverage = async (school_no, class_no) => {
       try {
         const { data: averageData } = await axios.get(`http://localhost:3000/part2_9/average/${school_no}/${class_no}`);
@@ -169,15 +183,6 @@ export default {
         processFetchedData(filteredData);
       } catch (error) {
         console.error('Failed to fetch filtered data:', error);
-      }
-    };
-
-    const fetchAllData = async () => {
-      try {
-        const { data: allData } = await axios.get('http://localhost:3000/part2_9/all');
-        processFetchedData(allData);
-      } catch (error) {
-        console.error('Failed to fetch all data:', error);
       }
     };
 
@@ -206,10 +211,10 @@ export default {
     const showStudentImage = async (studentName) => {
       selectedStudent.value = studentName;
       try {
-        const { data } = await axios.get(`http://localhost:3000/part2_9/image/${studentName}`);
-        selectedStudentImage.value = data.image;
+        const { data: imageData } = await axios.get(`http://localhost:3000/part2_9/image/${studentName}`);
+        selectedStudentImage.value = imageData.image;
       } catch (error) {
-        console.error('Failed to fetch student image:', error);
+        console.error('获取学生图像失败:', error);
       }
     };
 
@@ -233,10 +238,7 @@ export default {
       selectedStudent,
       selectedStudentImage,
       formattedSuggestion,
-      fetchStudentData,
-      fetchTeacherData,
       fetchFilteredData,
-      fetchAllData,
       showStudentImage,
       closeStudentImage
     };
@@ -245,32 +247,39 @@ export default {
 </script>
 
 <style scoped>
+/* 添加一些基本样式 */
+h1, h2 {
+  font-size: 1.5em;
+}
+
+select {
+  margin-bottom: 20px;
+}
+
 .modal {
-  display: block;
   position: fixed;
-  z-index: 1;
-  left: 0;
   top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  overflow: auto;
-  background-color: rgb(0,0,0);
-  background-color: rgba(0,0,0,0.4);
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .modal img {
-  display: block;
-  margin: auto;
-  max-width: 80%;
-  max-height: 80%;
+  max-width: 100%;
+  max-height: 100%;
 }
 
 .close {
   position: absolute;
-  right: 25px;
-  top: 0;
-  color: #000;
-  font-size: 35px;
-  font-weight: bold;
+  top: 10px;
+  right: 10px;
+  font-size: 2em;
+  color: #fff;
+  cursor: pointer;
 }
 </style>
+

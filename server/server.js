@@ -415,7 +415,119 @@ app.get('/api/admin-score-summary', (req, res) => {
     });
 });
 
-// 获取学生的各题分析
+////管理员的两个校区考情情况数据获取
+app.get('/api/admin-score-summary-campusCom', (req, res) => {
+    const { school: schoolSelection } = req.query;
+
+    // 确保提供了学校编号
+    if (!schoolSelection) {
+        return res.status(400).json({ message: 'School selection is required' });
+    }
+
+    // Query for max, min, avg scores
+    const summaryQuery = `
+        SELECT
+            MAX(score) AS max_score,
+            MIN(score) AS min_score,
+            AVG(score) AS avg_score
+        FROM gradeHave
+        WHERE school_no = ?
+    `;
+
+    // Query for count to calculate offsets
+    const countQuery = `
+        SELECT COUNT(*) AS total
+        FROM gradeHave
+        WHERE school_no = ?
+    `;
+
+    db.query(summaryQuery, [schoolSelection], (err, summaryResults) => {
+        if (err) {
+            console.error('Summary query failed:', err);
+            return res.status(500).json({ message: 'Server error' });
+        }
+
+        db.query(countQuery, [schoolSelection], (err, countResults) => {
+            if (err) {
+                console.error('Count query failed:', err);
+                return res.status(500).json({ message: 'Server error' });
+            }
+
+            const total = countResults[0].total;
+            const medianOffset = Math.floor(total / 2);
+            const q1Offset = Math.floor(total / 4);
+            const q3Offset = Math.floor(3 * total / 4);
+
+            // Query for median
+            const medianQuery = `
+                SELECT score
+                FROM gradeHave
+                WHERE school_no = ?
+                ORDER BY score
+                LIMIT 1
+                OFFSET ?
+            `;
+
+            db.query(medianQuery, [schoolSelection, medianOffset], (err, medianResults) => {
+                if (err) {
+                    console.error('Median query failed:', err);
+                    return res.status(500).json({ message: 'Server error' });
+                }
+
+                const medianScore = medianResults[0]?.score;
+
+                // Query for Q1
+                const q1Query = `
+                    SELECT score
+                    FROM gradeHave
+                    WHERE school_no = ?
+                    ORDER BY score
+                    LIMIT 1
+                    OFFSET ?
+                `;
+
+                db.query(q1Query, [schoolSelection, q1Offset], (err, q1Results) => {
+                    if (err) {
+                        console.error('Q1 query failed:', err);
+                        return res.status(500).json({ message: 'Server error' });
+                    }
+
+                    const q1Score = q1Results[0]?.score;
+
+                    // Query for Q3
+                    const q3Query = `
+                        SELECT score
+                        FROM gradeHave
+                        WHERE school_no = ?
+                        ORDER BY score
+                        LIMIT 1
+                        OFFSET ?
+                    `;
+
+                    db.query(q3Query, [schoolSelection, q3Offset], (err, q3Results) => {
+                        if (err) {
+                            console.error('Q3 query failed:', err);
+                            return res.status(500).json({ message: 'Server error' });
+                        }
+
+                        const q3Score = q3Results[0]?.score;
+
+                        res.json({
+                            max_score: summaryResults[0].max_score,
+                            min_score: summaryResults[0].min_score,
+                            avg_score: summaryResults[0].avg_score,
+                            median_score: medianScore,
+                            q1_score: q1Score,
+                            q3_score: q3Score
+                        });
+                    });
+                });
+            });
+        });
+    });
+});
+
+///获取学生的各题分析
 app.get('/api/student-scores', (req, res) => {
     const username = req.query.name;
     console.log("各题分析", username);
@@ -535,6 +647,7 @@ app.get('/api/student-scores', (req, res) => {
     });
 });
 
+///获取管理员/老师的各题分析
 app.get('/api/admin-scores', (req, res) => {
     const username = req.query.name;
     const classSelection = req.query.class;
@@ -654,6 +767,106 @@ app.get('/api/admin-scores', (req, res) => {
         });
     });
 });
+
+///获取管理员校区的各题分析
+app.get('/api/admin-scores-campusCom', (req, res) => {
+    const username = req.query.name;
+    const schoolSelection = req.query.school;
+
+    console.log("各题分析", username);
+    console.log("校区选择", schoolSelection);
+
+    if (!username) {
+        return res.status(400).json({ error: 'Name is required' });
+    }
+
+    let school_no;
+    if (schoolSelection) {
+        school_no = schoolSelection;
+    } else {
+        return res.status(400).json({ message: 'School selection is required' });
+    }
+
+    // 查询校区所有班级的分数并计算平均值
+    const getAverageScoresQuery = `
+        SELECT
+            AVG(PART1_I_1_score) AS PART1_I_1_score, AVG(PART1_I_2_score) AS PART1_I_2_score, AVG(PART1_I_3_score) AS PART1_I_3_score, AVG(PART1_I_4_score) AS PART1_I_4_score, AVG(PART1_I_5_score) AS PART1_I_5_score, AVG(PART1_I_6_score) AS PART1_I_6_score,
+            AVG(PART1_II_1_score) AS PART1_II_1_score, AVG(PART1_II_2_score) AS PART1_II_2_score, AVG(PART1_II_3_score) AS PART1_II_3_score, AVG(PART1_II_4_score) AS PART1_II_4_score, AVG(PART1_II_5_score) AS PART1_II_5_score, AVG(PART1_II_6_score) AS PART1_II_6_score,
+            AVG(PART1_III_1_score) AS PART1_III_1_score, AVG(PART1_III_2_score) AS PART1_III_2_score, AVG(PART1_III_3_score) AS PART1_III_3_score, AVG(PART1_III_4_score) AS PART1_III_4_score, AVG(PART1_III_5_score) AS PART1_III_5_score,
+            AVG(PART1_IV_1_score) AS PART1_IV_1_score, AVG(PART1_IV_2_score) AS PART1_IV_2_score, AVG(PART1_IV_3_score) AS PART1_IV_3_score, AVG(PART1_IV_4_score) AS PART1_IV_4_score, AVG(PART1_IV_5_score) AS PART1_IV_5_score,
+            AVG(PART1_V_1_score) AS PART1_V_1_score, AVG(PART1_V_2_score) AS PART1_V_2_score, AVG(PART1_V_3_score) AS PART1_V_3_score, AVG(PART1_V_4_score) AS PART1_V_4_score,
+            AVG(PART1_VI_1_score) AS PART1_VI_1_score, AVG(PART1_VI_2_score) AS PART1_VI_2_score, AVG(PART1_VI_3_score) AS PART1_VI_3_score, AVG(PART1_VI_4_score) AS PART1_VI_4_score, AVG(PART1_VI_5_score) AS PART1_VI_5_score,
+            AVG(PART1_VII_1_score) AS PART1_VII_1_score, AVG(PART1_VII_2_score) AS PART1_VII_2_score, AVG(PART1_VII_3_score) AS PART1_VII_3_score, AVG(PART1_VII_4_score) AS PART1_VII_4_score, AVG(PART1_VII_5_score) AS PART1_VII_5_score,
+            AVG(PART1_VIII_1_score) AS PART1_VIII_1_score, AVG(PART1_VIII_2_score) AS PART1_VIII_2_score, AVG(PART1_VIII_3_score) AS PART1_VIII_3_score, AVG(PART1_VIII_4_score) AS PART1_VIII_4_score,
+            AVG(PART2_I_score) AS PART2_I_score,
+            AVG(PART2_II_1_score) AS PART2_II_1_score, AVG(PART2_II_2_score) AS PART2_II_2_score, AVG(PART2_II_3_score) AS PART2_II_3_score, AVG(PART2_II_4_score) AS PART2_II_4_score, AVG(PART2_II_5_score) AS PART2_II_5_score,
+            AVG(PART2_III_1_score) AS PART2_III_1_score, AVG(PART2_III_2_score) AS PART2_III_2_score, AVG(PART2_III_3_score) AS PART2_III_3_score, AVG(PART2_III_4_score) AS PART2_III_4_score,
+            AVG(PART2_IV_1_score) AS PART2_IV_1_score, AVG(PART2_IV_2_score) AS PART2_IV_2_score, AVG(PART2_IV_3_score) AS PART2_IV_3_score, AVG(PART2_IV_4_score) AS PART2_IV_4_score, AVG(PART2_IV_5_score) AS PART2_IV_5_score, AVG(PART2_IV_6_score) AS PART2_IV_6_score, AVG(PART2_IV_7_score) AS PART2_IV_7_score, AVG(PART2_IV_8_score) AS PART2_IV_8_score, AVG(PART2_IV_9_score) AS PART2_IV_9_score,
+            AVG(PART2_V_1_1_score) AS PART2_V_1_1_score, AVG(PART2_V_1_2_score) AS PART2_V_1_2_score, AVG(PART2_V_2_1_score) AS PART2_V_2_1_score, AVG(PART2_V_2_2_score) AS PART2_V_2_2_score, AVG(PART2_V_3_1_score) AS PART2_V_3_1_score, AVG(PART2_V_3_2_score) AS PART2_V_3_2_score, AVG(PART2_V_4_1_score) AS PART2_V_4_1_score, AVG(PART2_V_4_2_score) AS PART2_V_4_2_score, AVG(PART2_V_5_1_score) AS PART2_V_5_1_score, AVG(PART2_V_5_2_score) AS PART2_V_5_2_score,
+            AVG(PART2_VI_1_score) AS PART2_VI_1_score, AVG(PART2_VI_2_score) AS PART2_VI_2_score, AVG(PART2_VI_3_score) AS PART2_VI_3_score, AVG(PART2_VI_4_score) AS PART2_VI_4_score, AVG(PART2_VI_5_score) AS PART2_VI_5_score,
+            AVG(PART2_VII_1_score) AS PART2_VII_1_score, AVG(PART2_VII_2_score) AS PART2_VII_2_score, AVG(PART2_VII_3_score) AS PART2_VII_3_score, AVG(PART2_VII_4_score) AS PART2_VII_4_score, AVG(PART2_VII_5_score) AS PART2_VII_5_score,
+            AVG(PART2_VIII_1_score) AS PART2_VIII_1_score, AVG(PART2_VIII_2_score) AS PART2_VIII_2_score, AVG(PART2_VIII_3_score) AS PART2_VIII_3_score, AVG(PART2_VIII_4_score) AS PART2_VIII_4_score
+        FROM gradeHave
+        WHERE school_no = ?
+    `;
+
+    db.query(getAverageScoresQuery, [school_no], (err, results) => {
+        if (err) {
+            console.error('Database query failed:', err);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ error: 'No data found' });
+        }
+        const averages = results[0];
+
+        // 计算每个大题的得分率
+        const totals_pre = {
+            PART1_I_total: (averages.PART1_I_1_score || 0) + (averages.PART1_I_2_score || 0) + (averages.PART1_I_3_score || 0) + (averages.PART1_I_4_score || 0) + (averages.PART1_I_5_score || 0) + (averages.PART1_I_6_score || 0),
+            PART1_II_total: (averages.PART1_II_1_score || 0) + (averages.PART1_II_2_score || 0) + (averages.PART1_II_3_score || 0) + (averages.PART1_II_4_score || 0) + (averages.PART1_II_5_score || 0) + (averages.PART1_II_6_score || 0),
+            PART1_III_total: (averages.PART1_III_1_score || 0) + (averages.PART1_III_2_score || 0) + (averages.PART1_III_3_score || 0) + (averages.PART1_III_4_score || 0) + (averages.PART1_III_5_score || 0),
+            PART1_IV_total: (averages.PART1_IV_1_score || 0) + (averages.PART1_IV_2_score || 0) + (averages.PART1_IV_3_score || 0) + (averages.PART1_IV_4_score || 0) + (averages.PART1_IV_5_score || 0),
+            PART1_V_total: (averages.PART1_V_1_score || 0) + (averages.PART1_V_2_score || 0) + (averages.PART1_V_3_score || 0) + (averages.PART1_V_4_score || 0),
+            PART1_VI_total: (averages.PART1_VI_1_score || 0) + (averages.PART1_VI_2_score || 0) + (averages.PART1_VI_3_score || 0) + (averages.PART1_VI_4_score || 0) + (averages.PART1_VI_5_score || 0),
+            PART1_VII_total: (averages.PART1_VII_1_score || 0) + (averages.PART1_VII_2_score || 0) + (averages.PART1_VII_3_score || 0) + (averages.PART1_VII_4_score || 0) + (averages.PART1_VII_5_score || 0),
+            PART1_VIII_total: (averages.PART1_VIII_1_score || 0) + (averages.PART1_VIII_2_score || 0) + (averages.PART1_VIII_3_score || 0) + (averages.PART1_VIII_4_score || 0),
+            PART2_I_total: (averages.PART2_I_score || 0),
+            PART2_II_total: (averages.PART2_II_1_score || 0) + (averages.PART2_II_2_score || 0) + (averages.PART2_II_3_score || 0) + (averages.PART2_II_4_score || 0) + (averages.PART2_II_5_score || 0),
+            PART2_III_total: (averages.PART2_III_1_score || 0) + (averages.PART2_III_2_score || 0) + (averages.PART2_III_3_score || 0) + (averages.PART2_III_4_score || 0),
+            PART2_IV_total: (averages.PART2_IV_1_score || 0) + (averages.PART2_IV_2_score || 0) + (averages.PART2_IV_3_score || 0) + (averages.PART2_IV_4_score || 0) + (averages.PART2_IV_5_score || 0) + (averages.PART2_IV_6_score || 0) + (averages.PART2_IV_7_score || 0) + (averages.PART2_IV_8_score || 0) + (averages.PART2_IV_9_score || 0),
+            PART2_V_total: (averages.PART2_V_1_1_score || 0) + (averages.PART2_V_1_2_score || 0) + (averages.PART2_V_2_1_score || 0) + (averages.PART2_V_2_2_score || 0) + (averages.PART2_V_3_1_score || 0) + (averages.PART2_V_3_2_score || 0) + (averages.PART2_V_4_1_score || 0) + (averages.PART2_V_4_2_score || 0) + (averages.PART2_V_5_1_score || 0) + (averages.PART2_V_5_2_score || 0),
+            PART2_VI_total: (averages.PART2_VI_1_score || 0) + (averages.PART2_VI_2_score || 0) + (averages.PART2_VI_3_score || 0) + (averages.PART2_VI_4_score || 0) + (averages.PART2_VI_5_score || 0),
+            PART2_VII_total: (averages.PART2_VII_1_score || 0) + (averages.PART2_VII_2_score || 0) + (averages.PART2_VII_3_score || 0) + (averages.PART2_VII_4_score || 0) + (averages.PART2_VII_5_score || 0),
+            PART2_VIII_total: (averages.PART2_VIII_1_score || 0) + (averages.PART2_VIII_2_score || 0) + (averages.PART2_VIII_3_score || 0) + (averages.PART2_VIII_4_score || 0)
+        };
+
+        const scores = {
+            PART1_I: (averages.PART1_I_1_score || 0) / totals_pre.PART1_I_total,
+            PART1_II: (averages.PART1_II_1_score || 0) / totals_pre.PART1_II_total,
+            PART1_III: (averages.PART1_III_1_score || 0) / totals_pre.PART1_III_total,
+            PART1_IV: (averages.PART1_IV_1_score || 0) / totals_pre.PART1_IV_total,
+            PART1_V: (averages.PART1_V_1_score || 0) / totals_pre.PART1_V_total,
+            PART1_VI: (averages.PART1_VI_1_score || 0) / totals_pre.PART1_VI_total,
+            PART1_VII: (averages.PART1_VII_1_score || 0) / totals_pre.PART1_VII_total,
+            PART1_VIII: (averages.PART1_VIII_1_score || 0) / totals_pre.PART1_VIII_total,
+            PART2_I: (averages.PART2_I_score || 0) / totals_pre.PART2_I_total,
+            PART2_II: (averages.PART2_II_1_score || 0) / totals_pre.PART2_II_total,
+            PART2_III: (averages.PART2_III_1_score || 0) / totals_pre.PART2_III_total,
+            PART2_IV: (averages.PART2_IV_1_score || 0) / totals_pre.PART2_IV_total,
+            PART2_V: (averages.PART2_V_1_1_score || 0) / totals_pre.PART2_V_total,
+            PART2_VI: (averages.PART2_VI_1_score || 0) / totals_pre.PART2_VI_total,
+            PART2_VII: (averages.PART2_VII_1_score || 0) / totals_pre.PART2_VII_total,
+            PART2_VIII: (averages.PART2_VIII_1_score || 0) / totals_pre.PART2_VIII_total
+        };
+
+        res.json({
+            averages: averages,
+            scores: scores
+        });
+    });
+});
+
 
 app.get('/api/question', (req, res) => {
     const { question } = req.query;
@@ -797,7 +1010,6 @@ app.get('/api/peer-accuracy', (req, res) => {
         });
     });
 });
-
 
 app.get('/api/option-percentages', async (req, res) => {
     const question = req.query.question;

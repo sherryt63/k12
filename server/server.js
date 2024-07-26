@@ -141,7 +141,7 @@ app.get('/api/score-summary', (req, res) => {
                     SELECT score FROM grade
                     WHERE school_no IN (?) ${analysisType === '1' ? 'AND class_no IN (?)' : ''}
                     ORDER BY score
-                    LIMIT 1 OFFSET ?
+                        LIMIT 1 OFFSET ?
                 `;
                 db.query(medianQuery, [...params, medianOffset], (err, medianResults) => {
                     if (err) {
@@ -156,7 +156,7 @@ app.get('/api/score-summary', (req, res) => {
                         SELECT score FROM grade
                         WHERE school_no IN (?) ${analysisType === '1' ? 'AND class_no IN (?)' : ''}
                         ORDER BY score
-                        LIMIT 1 OFFSET ?
+                            LIMIT 1 OFFSET ?
                     `;
                     db.query(q1Query, [...params, q1Offset], (err, q1Results) => {
                         if (err) {
@@ -170,7 +170,7 @@ app.get('/api/score-summary', (req, res) => {
                             SELECT score FROM grade
                             WHERE school_no IN (?) ${analysisType === '1' ? 'AND class_no IN (?)' : ''}
                             ORDER BY score
-                            LIMIT 1 OFFSET ?
+                                LIMIT 1 OFFSET ?
                         `;
                         db.query(q3Query, [...params, q3Offset], (err, q3Results) => {
                             if (err) {
@@ -352,7 +352,7 @@ app.get('/api/admin-score-summary', (req, res) => {
                 FROM gradeHave
                 WHERE school_no = ? AND class_no = ?
                 ORDER BY score
-                LIMIT 1
+                    LIMIT 1
                 OFFSET ?
             `;
 
@@ -370,7 +370,7 @@ app.get('/api/admin-score-summary', (req, res) => {
                     FROM gradeHave
                     WHERE school_no = ? AND class_no = ?
                     ORDER BY score
-                    LIMIT 1
+                        LIMIT 1
                     OFFSET ?
                 `;
 
@@ -388,7 +388,7 @@ app.get('/api/admin-score-summary', (req, res) => {
                         FROM gradeHave
                         WHERE school_no = ? AND class_no = ?
                         ORDER BY score
-                        LIMIT 1
+                            LIMIT 1
                         OFFSET ?
                     `;
 
@@ -1110,6 +1110,126 @@ app.get('/api/question_single', (req, res) => {
     });
 });
 
+// 获取所有班级的学生得分均分及错误表格
+app.get('/part2_1/summary', (req, res) => {
+    const sql = `
+        SELECT
+            AVG(score) AS averageScore,
+            SUM(capital_name) AS capital_name,
+            SUM(capital_first_word) AS capital_first_word,
+            SUM(copy) AS copy,
+            SUM(punctuation) AS punctuation,
+            SUM(others) AS others
+        FROM part2_1
+    `;
+
+    db.query(sql, (err, result) => {
+        if (err) {
+            console.error('获取总结数据失败:', err);
+            res.status(500).send('服务器错误');
+            return;
+        }
+
+        if (result.length === 0) {
+            res.status(404).send('没有找到数据');
+            return;
+        }
+
+        const data = result[0];
+        res.send({
+            averageScore: data.averageScore,
+            errorCounts: {
+                capital_name: data.capital_name,
+                capital_first_word: data.capital_first_word,
+                copy: data.copy,
+                punctuation: data.punctuation,
+                others: data.others
+            }
+        });
+    });
+});
+
+// 获取张江校区（school_no=1）的数据
+app.get('/part2_1/school/1', (req, res) => {
+    const sql = `
+        SELECT
+            AVG(score) AS averageScore,
+            SUM(capital_name) AS totalCapitalName,
+            SUM(capital_first_word) AS totalCapitalFirstWord,
+            SUM(copy) AS totalCopy,
+            SUM(punctuation) AS totalPunctuation,
+            SUM(others) AS totalOthers
+        FROM part2_1
+        WHERE school_no = 1
+    `;
+
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error('获取张江校区数据失败:', err);
+            res.status(500).send('服务器错误');
+            return;
+        }
+
+        if (results.length === 0) {
+            res.status(404).send('没有找到数据');
+            return;
+        }
+
+        const data = results[0];
+        res.send({
+            averageScore: data.averageScore,
+            errorCounts: {
+                capital_name: data.totalCapitalName,
+                capital_first_word: data.totalCapitalFirstWord,
+                copy: data.totalCopy,
+                punctuation: data.totalPunctuation,
+                others: data.totalOthers
+            }
+        });
+    });
+});
+
+// 获取滨江校区（school_no=2）的数据
+app.get('/part2_1/school/2', (req, res) => {
+    const sql = `
+        SELECT
+            AVG(score) AS averageScore,
+            SUM(capital_name) AS totalCapitalName,
+            SUM(capital_first_word) AS totalCapitalFirstWord,
+            SUM(copy) AS totalCopy,
+            SUM(punctuation) AS totalPunctuation,
+            SUM(others) AS totalOthers
+        FROM part2_1
+        WHERE school_no = 2
+    `;
+
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error('获取滨江校区数据失败:', err);
+            res.status(500).send('服务器错误');
+            return;
+        }
+
+        if (results.length === 0) {
+            res.status(404).send('没有找到数据');
+            return;
+        }
+
+        const data = results[0];
+        res.send({
+            averageScore: data.averageScore,
+            errorCounts: {
+                capital_name: data.totalCapitalName,
+                capital_first_word: data.totalCapitalFirstWord,
+                copy: data.totalCopy,
+                punctuation: data.totalPunctuation,
+                others: data.totalOthers
+            }
+        });
+    });
+});
+
+
 // 筛选数据并计算错误类型总和和平均分
 app.get('/part2_1/filter', (req, res) => {
     const { school_no, class_no } = req.query;
@@ -1275,6 +1395,76 @@ app.get('/teacher/:username', (req, res) => {
     });
 });
 
+
+app.get('/part2_9/errors/:username', (req, res) => {
+    const username = req.params.username;
+    const sql = `
+        SELECT 
+            \`WordPhrase choice\`, \`Pronouns & Determiners\`, Verbs, 
+            Conciseness, Style, \`Adverbs & Adjectives\`, Tense, Articles, \`Singular-Plural nouns\`, 
+            Prepositions, Punctuation, \`Spellings & Typos\`, \`Vague Words\`, Contractions, 
+            \`English Style-US\`, Conjunctions, Others, \`Capitalization & Spacing\`, \`Subject-verb agreement\`
+        FROM part2_9 
+        WHERE name = ?
+    `;
+
+    db.query(sql, [username], (err, result) => {
+        if (err) {
+            console.error('获取学生错误类型数量失败:', err);
+            res.status(500).send('服务器错误');
+            return;
+        }
+
+        if (result.length > 0) {
+            res.send(result[0]);
+        } else {
+            res.status(404).send('没有找到数据');
+        }
+    });
+});
+
+app.get('/part2_9/errors/class/:school_no/:class_no', (req, res) => {
+    const { school_no, class_no } = req.params;
+    const sql = `
+        SELECT 
+            SUM(\`WordPhrase choice\`) AS \`WordPhrase choice\`, 
+            SUM(\`Pronouns & Determiners\`) AS \`Pronouns & Determiners\`, 
+            SUM(Verbs) AS Verbs,
+            SUM(Conciseness) AS Conciseness, 
+            SUM(Style) AS Style, 
+            SUM(\`Adverbs & Adjectives\`) AS \`Adverbs & Adjectives\`, 
+            SUM(Tense) AS Tense, 
+            SUM(Articles) AS Articles, 
+            SUM(\`Singular-Plural nouns\`) AS \`Singular-Plural nouns\`,
+            SUM(Prepositions) AS Prepositions, 
+            SUM(Punctuation) AS Punctuation, 
+            SUM(\`Spellings & Typos\`) AS \`Spellings & Typos\`, 
+            SUM(\`Vague Words\`) AS \`Vague Words\`, 
+            SUM(Contractions) AS Contractions, 
+            SUM(\`English Style-US\`) AS \`English Style-US\`, 
+            SUM(Conjunctions) AS Conjunctions, 
+            SUM(Others) AS Others, 
+            SUM(\`Capitalization & Spacing\`) AS \`Capitalization & Spacing\`, 
+            SUM(\`Subject-verb agreement\`) AS \`Subject-verb agreement\`
+        FROM part2_9 
+        WHERE school_no = ? AND class_no = ?
+    `;
+
+    db.query(sql, [school_no, class_no], (err, result) => {
+        if (err) {
+            console.error('获取班级错误类型数量失败:', err);
+            res.status(500).send('服务器错误');
+            return;
+        }
+
+        if (result.length > 0) {
+            res.send(result[0]);
+        } else {
+            res.status(404).send('没有找到数据');
+        }
+    });
+});
+
 // 获取指定学生的图像数据
 app.get('/part2_9/image/:name', (req, res) => {
     const name = req.params.name;
@@ -1371,6 +1561,136 @@ app.get('/part2_9/all', (req, res) => {
     });
 });
 
+// 获取所有数据的统计信息
+app.get('/part2_9/overall', (req, res) => {
+    const sql = `
+        SELECT 
+            AVG(score) AS averageScore,
+            AVG(word_counts) AS averageWordCounts,
+            AVG(sentence_counts) AS averageSentenceCounts
+        FROM part2_9
+    `;
+
+    db.query(sql, (err, result) => {
+        if (err) {
+            console.error('获取所有数据统计失败:', err);
+            res.status(500).send('服务器错误');
+            return;
+        }
+
+        const averages = result[0];
+
+        // 获取错误类型数量
+        const errorTypesSql = `
+            SELECT 
+                SUM(\`WordPhrase choice\`) AS \`WordPhrase choice\`, 
+                SUM(\`Pronouns & Determiners\`) AS \`Pronouns & Determiners\`, 
+                SUM(Verbs) AS Verbs,
+                SUM(Conciseness) AS Conciseness, 
+                SUM(Style) AS Style, 
+                SUM(\`Adverbs & Adjectives\`) AS \`Adverbs & Adjectives\`, 
+                SUM(Tense) AS Tense, 
+                SUM(Articles) AS Articles, 
+                SUM(\`Singular-Plural nouns\`) AS \`Singular-Plural nouns\`,
+                SUM(Prepositions) AS Prepositions, 
+                SUM(Punctuation) AS Punctuation, 
+                SUM(\`Spellings & Typos\`) AS \`Spellings & Typos\`, 
+                SUM(\`Vague Words\`) AS \`Vague Words\`, 
+                SUM(Contractions) AS Contractions, 
+                SUM(\`English Style-US\`) AS \`English Style-US\`, 
+                SUM(Conjunctions) AS Conjunctions, 
+                SUM(Others) AS Others, 
+                SUM(\`Capitalization & Spacing\`) AS \`Capitalization & Spacing\`, 
+                SUM(\`Subject-verb agreement\`) AS \`Subject-verb agreement\`
+            FROM part2_9
+        `;
+
+        db.query(errorTypesSql, (err, errorResult) => {
+            if (err) {
+                console.error('获取所有数据错误类型数量失败:', err);
+                res.status(500).send('服务器错误');
+                return;
+            }
+
+            res.json({
+                averageScore: averages.averageScore,
+                averageWordCounts: averages.averageWordCounts,
+                averageSentenceCounts: averages.averageSentenceCounts,
+                errors: errorResult[0]
+            });
+        });
+    });
+});
+
+app.get('/part2_9/campus/:school_no', (req, res) => {
+    const { school_no } = req.params;
+
+    // 获取校区的平均数据
+    const avgSql = `
+        SELECT 
+            AVG(score) AS averageScore, 
+            AVG(word_counts) AS averageWordCounts, 
+            AVG(sentence_counts) AS averageSentenceCounts
+        FROM part2_9
+        WHERE school_no = ?
+    `;
+
+    db.query(avgSql, [school_no], (err, avgResult) => {
+        if (err) {
+            console.error('获取校区数据失败:', err);
+            res.status(500).send('服务器错误');
+            return;
+        }
+
+        if (avgResult.length === 0) {
+            res.status(404).send('没有找到数据');
+            return;
+        }
+
+        const averages = avgResult[0];
+
+        // 获取校区的错误类型数据
+        const errorTypesSql = `
+            SELECT 
+                SUM(\`WordPhrase choice\`) AS \`WordPhrase choice\`, 
+                SUM(\`Pronouns & Determiners\`) AS \`Pronouns & Determiners\`, 
+                SUM(Verbs) AS Verbs,
+                SUM(Conciseness) AS Conciseness, 
+                SUM(Style) AS Style, 
+                SUM(\`Adverbs & Adjectives\`) AS \`Adverbs & Adjectives\`, 
+                SUM(Tense) AS Tense, 
+                SUM(Articles) AS Articles, 
+                SUM(\`Singular-Plural nouns\`) AS \`Singular-Plural nouns\`,
+                SUM(Prepositions) AS Prepositions, 
+                SUM(Punctuation) AS Punctuation, 
+                SUM(\`Spellings & Typos\`) AS \`Spellings & Typos\`, 
+                SUM(\`Vague Words\`) AS \`Vague Words\`, 
+                SUM(Contractions) AS Contractions, 
+                SUM(\`English Style-US\`) AS \`English Style-US\`, 
+                SUM(Conjunctions) AS Conjunctions, 
+                SUM(Others) AS Others, 
+                SUM(\`Capitalization & Spacing\`) AS \`Capitalization & Spacing\`, 
+                SUM(\`Subject-verb agreement\`) AS \`Subject-verb agreement\`
+            FROM part2_9
+            WHERE school_no = ?
+        `;
+
+        db.query(errorTypesSql, [school_no], (err, errorResult) => {
+            if (err) {
+                console.error('获取校区错误类型数据失败:', err);
+                res.status(500).send('服务器错误');
+                return;
+            }
+
+            res.json({
+                averageScore: averages.averageScore,
+                averageWordCounts: averages.averageWordCounts,
+                averageSentenceCounts: averages.averageSentenceCounts,
+                errors: errorResult[0]
+            });
+        });
+    });
+});
 
 // 获取教师权限
 app.get('/teacher/:username', (req, res) => {

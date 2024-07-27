@@ -32,7 +32,8 @@
             </div>
 
             <div v-if="questionDescriptions[question]">
-                <p>【题目描述】：{{ questionDescriptions[question] }}</p>
+                <p> 【题目描述】</p>
+                <p v-html="questionDescriptions[question]"></p>
             </div>
 
             <!-- 显示图片和难度 -->
@@ -73,7 +74,7 @@
             <!-- 参考解析 -->
             <div>
                 <h3>参考解析</h3>
-                <p>{{ referenceAnalysis }}</p>
+                <p>{{ questionData[question]?.referenceAnalysis }}</p>
             </div>
 
             <hr>
@@ -101,8 +102,7 @@ export default {
             options: [
                 { text: 'A', value: 'A' },
                 { text: 'B', value: 'B' },
-                { text: 'C', value: 'C' },
-                { text: 'D', value: 'D' }
+                { text: 'C', value: 'C' }
             ],
             questionData: {},
             selectedClass: '11',
@@ -120,15 +120,15 @@ export default {
                 'PART2_IV_9': { difficulty: '两颗星' }
             },
             questionDescriptions: {
-                'PART2_IV_1': '(   ) 1. I _____ like dolls. They are for girls.A.am not		 		B.can’t 			   C.don’t',
-                'PART2_IV_2': '(   ) 2. --- What are those  ________ English?    --- They are shoes.A.in		 			B.on			   C.for',
-                'PART2_IV_3': '(   ) 3. It’s so cold. Don’t _____ the jacket.A.turn off				B.take off		   C.turn on',
-                'PART2_IV_4': '(   ) 4.--- What ____ is it?      	--- It’s a star.A.colour					B.season    	   C.shape',
-                'PART2_IV_5': '(   ) 5. In winter, I like ______ in the room.A.Sleep 				B.sleepping 	   C.sleeping',
-                'PART2_IV_6': '(   ) 6. --- Is it summer? 			--- ______________.A.Yes, it’s autumn.B.No, it’s autumn.C.No, it’s summer .',
-                'PART2_IV_7': '(   ) 7. My nose __________ small but my feet ___________ big.A.are, is 				B.is, are			   C.is, is',
-                'PART2_IV_8': '(   ) 8. --- What ________ you do on Mother’s Day?--- I make a card. A.do					B.can			   C.are',
-                'PART2_IV_9': '(   ) 9. There are two Children’s days in ________ .A.Japan			    B.Thailand		   C.Singapore'
+                'PART2_IV_1': '(   ) 1. I _____ like dolls. They are for girls.A.am not	 		<span class="highlightedCon">B.can’t</span> 			   <span class="highlighted">C.don’t</span>',
+                'PART2_IV_2': '(   ) 2. --- What are those  ________ English?    --- They are shoes.<span class="highlighted">A.in</span>		 			B.on			   C.for',
+                'PART2_IV_3': '(   ) 3. It’s so cold. Don’t _____ the jacket.A.turn off				<span class="highlighted">B.take off</span>		   C.turn on',
+                'PART2_IV_4': '(   ) 4.--- What ____ is it?      	--- It’s a star.A.colour					B.season    	   <span class="highlighted">C.shape</span>',
+                'PART2_IV_5': '(   ) 5. In winter, I like ______ in the room.A.Sleep 				<span class="highlightedCon">B.sleepping</span>	   <span class="highlighted">C.sleeping</span>',
+                'PART2_IV_6': '(   ) 6. --- Is it summer? 			--- ______________.A.Yes, it’s autumn.<span class="highlighted">B.No, it’s autumn.</span>C.No, it’s summer .',
+                'PART2_IV_7': '(   ) 7. My nose __________ small but my feet ___________ big.A.are, is 				<span class="highlighted">B.is, are</span>			   C.is, is',
+                'PART2_IV_8': '(   ) 8. --- What ________ you do on Mother’s Day?--- I make a card. <span class="highlighted">A.do</span>					B.can			   C.are',
+                'PART2_IV_9': '(   ) 9. There are two Children’s days in ________ .<span class="highlighted">A.Japan</span>			    B.Thailand		   C.Singapore'
             },
             classOptions: []
         };
@@ -183,11 +183,18 @@ export default {
                             params: { name: this.name, question }
                         });
                         const peerAccuracy = peerResponse.data.accuracy * 100;
+
+                        const referenceAnalysisResponse = await axios.get('http://localhost:3000/api/analysis', {
+                            params: { question, options: studentAnswer }
+                        });
+                        const referenceAnalysis = referenceAnalysisResponse.data.analysis;
+
                         questionData[question] = {
                             correctAnswer,
                             listeningText,
                             studentAnswer,
-                            peerAccuracy
+                            peerAccuracy,
+                            referenceAnalysis
                         };
                     } else if (this.permission === '2') {
                         // 获取选项人数比
@@ -203,11 +210,17 @@ export default {
                         });
                         const optionCounts = optionCountsResponse.data.optionCounts;
 
+                        const referenceAnalysisResponse = await axios.get('http://localhost:3000/api/analysis', {
+                            params: { question, options: correctAnswer }
+                        });
+                        const referenceAnalysis = referenceAnalysisResponse.data.analysis;
+
                         questionData[question] = {
                             correctAnswer,
                             listeningText,
                             optionPercentages,
-                            optionCounts
+                            optionCounts,
+                            referenceAnalysis
                         };
 
                         this.optionCounts = optionCounts;
@@ -226,11 +239,17 @@ export default {
                         });
                         const optionCounts = optionCountsResponse.data.optionCounts;
 
+                        const referenceAnalysisResponse = await axios.get('http://localhost:3000/api/analysis', {
+                            params: { question, options: correctAnswer }
+                        });
+                        const referenceAnalysis = referenceAnalysisResponse.data.analysis;
+
                         questionData[question] = {
                             correctAnswer,
                             listeningText,
                             optionPercentages,
-                            optionCounts
+                            optionCounts,
+                            referenceAnalysis
                         };
 
                         this.optionCounts = optionCounts;
@@ -278,6 +297,10 @@ export default {
 <style>
 .highlighted {
     background-color: yellow;
+}
+
+.highlightedCon {
+    background-color: rgb(148, 211, 92);
 }
 
 .highlight {

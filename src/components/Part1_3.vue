@@ -15,11 +15,11 @@
         </div>
 
         <div v-if="permission === '0'" class="class-select">
-                <label for="class-select">选择班级：</label>
-                <select id="class-select" v-model="selectedClass" @change="fetchData">
-                  <option v-for="cls in classOptions" :key="cls" :value="cls">{{ getClassDisplayName(cls) }}</option>
-                </select>
-              </div>
+            <label for="class-select">选择班级：</label>
+            <select id="class-select" v-model="selectedClass" @change="fetchData">
+                <option v-for="cls in classOptions" :key="cls" :value="cls">{{ getClassDisplayName(cls) }}</option>
+            </select>
+        </div>
 
         <div v-for="(question, index) in questions" :key="index">
 
@@ -36,7 +36,8 @@
             </div>
 
             <div v-if="questionDescriptions[question]">
-                <p>【题目描述】：{{ questionDescriptions[question] }}</p>
+                <p> 【题目描述】</p>
+                <p v-html="questionDescriptions[question]"></p>
             </div>
 
             <!-- 显示图片和难度 -->
@@ -77,7 +78,7 @@
             <!-- 参考解析 -->
             <div>
                 <h3>参考解析</h3>
-                <p>{{ referenceAnalysis }}</p>
+                <p>{{ questionData[question]?.referenceAnalysis }}</p>
             </div>
 
             <hr>
@@ -119,11 +120,11 @@ export default {
                 'PART1_III_5': { difficulty: '两颗星' }
             },
             questionDescriptions: {
-                'PART1_III_1': '(   ) 1. A. I can hear a bus. 	B. I can see a bus.	C. I hear a bus.',
-                'PART1_III_2': '(   ) 2. A. These are my shoes.	B. Those are my shoes.	C. They are my shoes.',
-                'PART1_III_3': '(   ) 3. A. Stretch your arms.	B. Stamp your feet.	C. Clamp your hands.',
-                'PART1_III_4': '(   ) 4. A. We have a class party.	B. We have a birthday party.	C. We have a party.',
-                'PART1_III_5': '(   ) 5. A. Let’s go fishing.	B. Let’s go swimming.	C. Let’s go shopping.',
+                'PART1_III_1': '(   ) 1. <span class="highlightedCon">A. I can hear a bus. </span>	B. I can see a bus.	<span class="highlighted">C. I hear a bus.</span>',
+                'PART1_III_2': '(   ) 2. <span class="highlighted">A. These are my shoes.</span>	B. Those are my shoes.	C. They are my shoes.',
+                'PART1_III_3': '(   ) 3. A. Stretch your arms.<span class="highlighted">B. Stamp your feet.</span>	C. Clamp your hands.',
+                'PART1_III_4': '(   ) 4. A. We have a class party.	B. We have a birthday party.	<span class="highlighted">C. We have a party.</span>',
+                'PART1_III_5': '(   ) 5. <span class="highlighted">A. Let’s go fishing.	</span>B. Let’s go swimming.	C. Let’s go shopping.',
             },
             classOptions: []
         };
@@ -178,11 +179,16 @@ export default {
                             params: { name: this.name, question }
                         });
                         const peerAccuracy = peerResponse.data.accuracy * 100;
+                        const referenceAnalysisResponse = await axios.get('http://localhost:3000/api/analysis', {
+                            params: { question, options: studentAnswer }
+                        });
+                        const referenceAnalysis = referenceAnalysisResponse.data.analysis;
                         questionData[question] = {
                             correctAnswer,
                             listeningText,
                             studentAnswer,
-                            peerAccuracy
+                            peerAccuracy,
+                            referenceAnalysis
                         };
                     } else if (this.permission === '2') {
                         // 获取选项人数比
@@ -198,11 +204,17 @@ export default {
                         });
                         const optionCounts = optionCountsResponse.data.optionCounts;
 
+                        const referenceAnalysisResponse = await axios.get('http://localhost:3000/api/analysis', {
+                            params: { question, options: correctAnswer }
+                        });
+                        const referenceAnalysis = referenceAnalysisResponse.data.analysis;
+
                         questionData[question] = {
                             correctAnswer,
                             listeningText,
                             optionPercentages,
-                            optionCounts
+                            optionCounts,
+                            referenceAnalysis
                         };
 
                         this.optionCounts = optionCounts;
@@ -221,11 +233,17 @@ export default {
                         });
                         const optionCounts = optionCountsResponse.data.optionCounts;
 
+                        const referenceAnalysisResponse = await axios.get('http://localhost:3000/api/analysis', {
+                            params: { question, options: correctAnswer }
+                        });
+                        const referenceAnalysis = referenceAnalysisResponse.data.analysis;
+
                         questionData[question] = {
                             correctAnswer,
                             listeningText,
                             optionPercentages,
-                            optionCounts
+                            optionCounts,
+                            referenceAnalysis
                         };
 
                         this.optionCounts = optionCounts;
@@ -274,6 +292,11 @@ export default {
 .highlighted {
     background-color: yellow;
 }
+
+.highlightedCon {
+    background-color: rgb(148, 211, 92);
+}
+
 
 .highlight {
     color: red;

@@ -911,6 +911,38 @@ app.get('/api/question', (req, res) => {
     });
 });
 
+///获取特定选项的解析
+app.get('/api/analysis', (req, res) => {
+    console.log("获取特定解析");
+    const question = req.query.question;
+    const options = req.query.options;
+    console.log(question);
+    console.log(options);
+
+    if (!question || !options) {
+        return res.status(400).json({ message: 'Question and options parameters are required' });
+    }
+
+    const analysisQuery = 'SELECT analysis FROM questions_analysis WHERE question = ? AND options = ?';
+    db.query(analysisQuery, [question, options], (err, analysisResults) => {
+        if (err) {
+            console.error('Database query failed:', err);
+            return res.status(500).json({ message: 'Server error' });
+        }
+
+        if (analysisResults.length === 0) {
+            return res.status(404).json({ message: 'Analysis not found' });
+        }
+
+        const analysis = analysisResults[0].analysis;
+        console.log(analysis);
+
+        // 返回结果
+        res.json({ analysis });
+    });
+});
+
+
 app.get('/api/student-answer', (req, res) => {
     const { name, question } = req.query;
     //console.log(question);

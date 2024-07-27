@@ -77,7 +77,7 @@
             <!-- 参考解析 -->
             <div>
                 <h3>参考解析</h3>
-                <p>{{ referenceAnalysis }}</p>
+                <p>{{ questionData[question]?.referenceAnalysis }}</p>
             </div>
 
             <hr>
@@ -179,11 +179,13 @@ export default {
                         });
                         console.log(peerResponse);
                         const peerAccuracy = peerResponse.data.accuracy * 100;
+                        const referenceAnalysis = this.referenceAnalysis;
                         questionData[question] = {
                             correctAnswer,
                             listeningText,
                             studentAnswer,
-                            peerAccuracy
+                            peerAccuracy,
+                            referenceAnalysis
                         };
                         console.log(questionData);
                     } else if (this.permission === '2') {
@@ -199,12 +201,14 @@ export default {
                             params: { question, class: this.selectedClass }
                         });
                         const optionCounts = optionCountsResponse.data.optionCounts;
+                        const referenceAnalysis = this.referenceAnalysis;
 
                         questionData[question] = {
                             correctAnswer,
                             listeningText,
                             optionPercentages,
-                            optionCounts
+                            optionCounts,
+                            referenceAnalysis
                         };
 
                         this.optionCounts = optionCounts;
@@ -222,12 +226,14 @@ export default {
                             params: { question, class: this.selectedClass }
                         });
                         const optionCounts = optionCountsResponse.data.optionCounts;
+                        const referenceAnalysis = this.referenceAnalysis;
 
                         questionData[question] = {
                             correctAnswer,
                             listeningText,
                             optionPercentages,
-                            optionCounts
+                            optionCounts,
+                            referenceAnalysis
                         };
 
                         this.optionCounts = optionCounts;

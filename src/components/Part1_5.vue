@@ -3,7 +3,7 @@
         <h2>Ⅴ. Listen and write（听一听，写出听到的单词完成短文，每线一词）：【词汇-词音，词汇-词形】{{ staticData[question]?.difficulty }}</h2>
 
         <div class="images">
-          <img src="public/images/PART1_5.png" />
+          <img src="images/PART1_5.png" />
         </div>
         
         <div v-if="permission === '2'" class="class-select">
@@ -81,7 +81,7 @@
             <!-- 参考解析 -->
             <div>
                 <h3>参考解析</h3>
-                <p>{{ referenceAnalysis }}</p>
+                <p>{{ questionData[question]?.referenceAnalysis }}</p>
             </div>
 
             <hr>
@@ -181,11 +181,16 @@ export default {
                         });
                         console.log(peerResponse);
                         const peerAccuracy = peerResponse.data.accuracy * 100;
+                        const referenceAnalysis = this.referenceAnalysis;
+                        console.log("解析为", referenceAnalysis);
+
+                        
                         questionData[question] = {
                             correctAnswer,
                             listeningText,
                             studentAnswer,
-                            peerAccuracy
+                            peerAccuracy,
+                            referenceAnalysis
                         };
                         console.log(questionData);
                     } else if (this.permission === '2') {
@@ -201,12 +206,13 @@ export default {
                             params: { question, class: this.selectedClass }
                         });
                         const optionCounts = optionCountsResponse.data.optionCounts;
-
+                        const referenceAnalysis = this.referenceAnalysis;
                         questionData[question] = {
                             correctAnswer,
                             listeningText,
                             optionPercentages,
-                            optionCounts
+                            optionCounts,
+                            referenceAnalysis
                         };
 
                         this.optionCounts = optionCounts;
@@ -224,12 +230,15 @@ export default {
                             params: { question, class: this.selectedClass }
                         });
                         const optionCounts = optionCountsResponse.data.optionCounts;
+                        const referenceAnalysis = this.referenceAnalysis;
+
 
                         questionData[question] = {
                             correctAnswer,
                             listeningText,
                             optionPercentages,
-                            optionCounts
+                            optionCounts,
+                            referenceAnalysis
                         };
 
                         this.optionCounts = optionCounts;

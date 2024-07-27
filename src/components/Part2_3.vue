@@ -72,7 +72,7 @@
             <!-- 参考解析 -->
             <div>
                 <h3>参考解析</h3>
-                <p>{{ referenceAnalysis }}</p>
+                <p>{{ questionData[question]?.referenceAnalysis }}</p>
             </div>
 
             <hr>
@@ -170,11 +170,18 @@ export default {
                             params: { name: this.name, question }
                         });
                         const peerAccuracy = peerResponse.data.accuracy * 100;
+
+                        const referenceAnalysisResponse = await axios.get('http://localhost:3000/api/analysis', {
+                            params: { question, options: studentAnswer }
+                        });
+                        const referenceAnalysis = referenceAnalysisResponse.data.analysis;
+
                         questionData[question] = {
                             correctAnswer,
                             listeningText,
                             studentAnswer,
-                            peerAccuracy
+                            peerAccuracy,
+                            referenceAnalysis
                         };
                     } else if (this.permission === '2') {
                         // 获取选项人数比
@@ -190,11 +197,17 @@ export default {
                         });
                         const optionCounts = optionCountsResponse.data.optionCounts;
 
+                        const referenceAnalysisResponse = await axios.get('http://localhost:3000/api/analysis', {
+                            params: { question, options: correctAnswer }
+                        });
+                        const referenceAnalysis = referenceAnalysisResponse.data.analysis;
+
                         questionData[question] = {
                             correctAnswer,
                             listeningText,
                             optionPercentages,
-                            optionCounts
+                            optionCounts,
+                            referenceAnalysis
                         };
 
                         this.optionCounts = optionCounts;
@@ -213,11 +226,17 @@ export default {
                         });
                         const optionCounts = optionCountsResponse.data.optionCounts;
 
+                        const referenceAnalysisResponse = await axios.get('http://localhost:3000/api/analysis', {
+                            params: { question, options: correctAnswer }
+                        });
+                        const referenceAnalysis = referenceAnalysisResponse.data.analysis;
+
                         questionData[question] = {
                             correctAnswer,
                             listeningText,
                             optionPercentages,
-                            optionCounts
+                            optionCounts,
+                            referenceAnalysis
                         };
 
                         this.optionCounts = optionCounts;

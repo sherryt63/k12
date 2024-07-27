@@ -17,9 +17,9 @@
         <div v-if="permission === '0'" class="class-select">
             <label for="class-select">选择班级：</label>
             <select id="class-select" v-model="selectedClass" @change="fetchData">
-              <option v-for="cls in classOptions" :key="cls" :value="cls">{{ getClassDisplayName(cls) }}</option>
+                <option v-for="cls in classOptions" :key="cls" :value="cls">{{ getClassDisplayName(cls) }}</option>
             </select>
-          </div>
+        </div>
 
         <div v-for="(question, index) in questions" :key="index">
 
@@ -29,15 +29,16 @@
             </div>
 
             <div class="question-container">
-                    <p
-                        :class="{ highlighted: permission === '1' && questionData[question]?.studentAnswer !== questionData[question]?.correctAnswer }">
-                        【题目】： {{ index + 1 }}
-                    </p>
-                </div>
+                <p
+                    :class="{ highlighted: permission === '1' && questionData[question]?.studentAnswer !== questionData[question]?.correctAnswer }">
+                    【题目】： {{ index + 1 }}
+                </p>
+            </div>
 
-                <div v-if="questionDescriptions[question]">
-                    <p>【题目描述】：{{ questionDescriptions[question] }}</p>
-                </div>
+            <div v-if="questionDescriptions[question]">
+                <p> 【题目描述】</p>
+                <p v-html="questionDescriptions[question]"></p>
+            </div>
 
             <!-- 显示图片和难度 -->
             <div>
@@ -45,7 +46,8 @@
                 <div v-for="(option, optIndex) in options" :key="optIndex">
                     <p v-html="highlightText(option.text, questionData[question]?.correctAnswer)"></p>
                     <!-- 显示选项人数，只有 permission === '0' 或 permission === '2' 时显示 -->
-                    <p v-if="permission === '0' || permission === '2'">选择人数：{{ questionData[question]?.optionCounts[option.value] || 0 }}</p>
+                    <p v-if="permission === '0' || permission === '2'">选择人数：{{
+                        questionData[question]?.optionCounts[option.value] || 0 }}</p>
                 </div>
                 <p>【难度】：{{ staticData[question]?.difficulty }}</p>
             </div>
@@ -76,7 +78,7 @@
             <!-- 参考解析 -->
             <div>
                 <h3>参考解析</h3>
-                <p>{{ referenceAnalysis }}</p>
+                <p>{{ questionData[question]?.referenceAnalysis }}</p>
             </div>
 
             <hr>
@@ -119,12 +121,12 @@ export default {
                 'PART1_II_6': { difficulty: '两颗星' }
             },
             questionDescriptions: {
-                'PART1_II_1': '1. A. horse B. house C. home',
-                'PART1_II_2': '2. A. shape B. sharp C. shop',
-                'PART1_II_3': '3. A. arms B. eyes C. ears',
-                'PART1_II_4': '4. A. like a ball B. like a doll C. like a box',
-                'PART1_II_5': '5. A. in spring B. in green C. in autumn',
-                'PART1_II_6': '6. A. my new house B. my own house C. my little house',
+                'PART1_II_1': '1. <span class="highlighted">A. horse </span> <span class="highlightedCon">B. house</span> C. home',
+                'PART1_II_2': '2. <span class="highlightedCon">A. shape</span> <span class="highlightedCon">B. sharp</span> <span class="highlighted">C. shop</span>',
+                'PART1_II_3': '3. A. arms <span class="highlighted">B. eyes </span>C. ears',
+                'PART1_II_4': '4. <span class="highlightedCon">A. like a ball</span> <span class="highlighted">B. like a doll </span>C. like a box',
+                'PART1_II_5': '5. <span class="highlighted">A. in spring </span>B. in green C. in autumn',
+                'PART1_II_6': '6. A. my new house B. my own house <span class="highlighted"> C. my little house</span>',
             },
             classOptions: []
         };
@@ -179,11 +181,18 @@ export default {
                             params: { name: this.name, question }
                         });
                         const peerAccuracy = peerResponse.data.accuracy * 100;
+
+                        const referenceAnalysisResponse = await axios.get('http://localhost:3000/api/analysis', {
+                            params: { question, options: studentAnswer }
+                        });
+                        const referenceAnalysis = referenceAnalysisResponse.data.analysis;
+
                         questionData[question] = {
                             correctAnswer,
                             listeningText,
                             studentAnswer,
-                            peerAccuracy
+                            peerAccuracy,
+                            referenceAnalysis
                         };
                     } else if (this.permission === '2') {
                         // 获取选项人数比
@@ -198,12 +207,17 @@ export default {
                             params: { question, class: this.selectedClass }
                         });
                         const optionCounts = optionCountsResponse.data.optionCounts;
+                        const referenceAnalysisResponse = await axios.get('http://localhost:3000/api/analysis', {
+                            params: { question, options: correctAnswer }
+                        });
+                        const referenceAnalysis = referenceAnalysisResponse.data.analysis;
 
                         questionData[question] = {
                             correctAnswer,
                             listeningText,
                             optionPercentages,
-                            optionCounts
+                            optionCounts,
+                            referenceAnalysis
                         };
 
                         this.optionCounts = optionCounts;
@@ -221,12 +235,17 @@ export default {
                             params: { question, class: this.selectedClass }
                         });
                         const optionCounts = optionCountsResponse.data.optionCounts;
+                        const referenceAnalysisResponse = await axios.get('http://localhost:3000/api/analysis', {
+                            params: { question, options: correctAnswer }
+                        });
+                        const referenceAnalysis = referenceAnalysisResponse.data.analysis;
 
                         questionData[question] = {
                             correctAnswer,
                             listeningText,
                             optionPercentages,
-                            optionCounts
+                            optionCounts,
+                            referenceAnalysis
                         };
 
                         this.optionCounts = optionCounts;
@@ -274,6 +293,10 @@ export default {
 <style>
 .highlighted {
     background-color: yellow;
+}
+
+.highlightedCon {
+    background-color: rgb(148, 211, 92);
 }
 
 .highlight {

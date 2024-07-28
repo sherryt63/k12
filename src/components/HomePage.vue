@@ -1,34 +1,63 @@
 <template>
   <div class="container">
-    <h1>欢迎, {{ name }}!</h1>
-    <p>你的身份是: {{ permissionLabel }}</p>
-
+    <div class="header1">
+      <h1>欢迎, {{ name }}!</h1>
+      <p>你的身份是: <span class="id">{{ permissionLabel }}</span></p>
+    </div>
     <div class="images">
-      <img src="/images/paper_title.png" alt="Image 0" />
+      <img
+        src="/images/paper_title.png"
+        alt="Image 0"
+      />
     </div>
 
-    <div v-if="permission === 0">
-      <button @click="fetchTeacherClasses">获取班级</button>
-      <select v-if="classes.length" v-model="selectedClass" @change="fetchData">
-        <option v-for="cls in classes" :key="cls" :value="cls">{{ cls }}</option>
+    <div
+      v-if="permission === 0"
+      class="teacherchoose"
+    >
+      <button
+        @click="fetchTeacherClasses"
+        class="fetch-button"
+      >获取班级</button>
+      <select
+        v-if="classes.length"
+        v-model="selectedClass"
+        @change="fetchData"
+      >
+        <option
+          v-for="cls in classes"
+          :key="cls"
+          :value="cls"
+        >{{ cls }}</option>
       </select>
     </div>
 
-    <div v-if="permission === 2">
-        <!-- 分析类型选择 -->
-      
+    <div
+      v-if="permission === 2"
+      class="admin"
+    >
+      <!-- 分析类型选择 -->
+      <div class="label1">
         <label for="analysis-type">选择分析类型：</label>
-        <select v-model="selectedAnalysisType" id="analysis-type">
+        <select
+          v-model="selectedAnalysisType"
+          id="analysis-type"
+        >
           <option value="single">单个班级</option>
           <option value="comparison">两个班级对比</option>
           <option value="campus-comparison">两个校区对比</option>
         </select>
-        
+      </div>
 
-        <!-- 单个班级选择 -->
-        <div v-if="selectedAnalysisType === 'single'">
+      <!-- 单个班级选择 -->
+      <div v-if="selectedAnalysisType === 'single'">
+        <div class="label2">
           <label for="single-class">选择班级：</label>
-          <select v-model="selectedClass" id="single-class" @change="fetchData">
+          <select
+            v-model="selectedClass"
+            id="single-class"
+            @change="fetchData"
+          >
             <option value="1_1">张江一班</option>
             <option value="1_2">张江二班</option>
             <option value="1_3">张江三班</option>
@@ -36,36 +65,46 @@
             <option value="2_2">滨江二班</option>
             <option value="2_3">滨江三班</option>
           </select>
-
-          <!-- 显示单个班级的考情分析箱型图 -->
-          <div id="score-summary" class="chart-container"></div>
-
-          <!-- 显示各题得分表格 -->
-          <div>
-            <h3>各题得分表</h3>
-            <div class="table-container">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>题号</th>
-                      <th>各小题得分率</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="item in scoreDistributionData" :key="item.question">
-                      <td>{{ item.question }}</td>
-                      <td>{{ formatNumber(item.avg_score) }}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
         </div>
+        <!-- 显示单个班级的考情分析箱型图 -->
+        <div
+          id="score-summary"
+          class="chart-container"
+        ></div>
 
-        <!-- 班级对比选择 -->
-        <div v-else-if="selectedAnalysisType === 'comparison'">
+        <!-- 显示各题得分表格 -->
+        <div>
+          <h2>各题得分情况</h2>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>题号</th>
+                  <th>各小题得分率</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="item in scoreDistributionData"
+                  :key="item.question"
+                >
+                  <td>{{ item.question }}</td>
+                  <td>{{ formatNumber(item.avg_score) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 班级对比选择 -->
+      <div v-else-if="selectedAnalysisType === 'comparison'">
+        <div class="label3">
           <label for="compare-classes">选择对比班级：</label>
-          <select v-model="selectedComparison" id="compare-classes">
+          <select
+            v-model="selectedComparison"
+            id="compare-classes"
+          >
             <option value="1_1&1_2">张江一班&张江二班</option>
             <option value="1_1&1_3">张江一班&张江三班</option>
             <option value="1_2&1_3">张江二班&张江三班</option>
@@ -73,51 +112,65 @@
             <option value="2_1&2_3">滨江一班&滨江三班</option>
             <option value="2_2&2_3">滨江二班&滨江三班</option>
           </select>
-
-          <!-- 显示两个班级的考情分析箱型图 -->
-          <div id="score-summary-com" class="chart-container"></div>
-
-          <!-- 显示各题得分表格 -->
-          <div>
-            <h3>各题得分表</h3>
-            <div class="table-container">
-              <table>
-                <thead>
-                    <tr>
-                      <th>题号</th>
-                      <th>{{ getClassName(selectedComparison.split('&')[0]) }}各小题得分率</th>
-                      <th>{{ getClassName(selectedComparison.split('&')[1]) }}各小题得分率</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="(score, index) in comparisonScores" :key="index">
-                      <td>{{ score.question }}</td>
-                      <td>{{ formatNumber(score.class1) }}</td>
-                      <td>{{ formatNumber(score.class2) }}</td>
-                    </tr>
-                  </tbody>
-              </table>
-            </div>
-          </div>
-
         </div>
 
+        <!-- 显示两个班级的考情分析箱型图 -->
+        <div
+          id="score-summary-com"
+          class="chart-container"
+        ></div>
 
-        <!-- 校区对比选择 -->
-        <div v-else-if="selectedAnalysisType === 'campus-comparison'">
+        <!-- 显示各题得分表格 -->
+        <div>
+          <h2>各题得分情况</h2>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>题号</th>
+                  <th>{{ getClassName(selectedComparison.split('&')[0]) }}各小题得分率</th>
+                  <th>{{ getClassName(selectedComparison.split('&')[1]) }}各小题得分率</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="(score, index) in comparisonScores"
+                  :key="index"
+                >
+                  <td>{{ score.question }}</td>
+                  <td>{{ formatNumber(score.class1) }}</td>
+                  <td>{{ formatNumber(score.class2) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 校区对比选择 -->
+      <div v-else-if="selectedAnalysisType === 'campus-comparison'">
+        <div class="label4">
           <label for="compare-campuses">选择对比校区：</label>
-          <select v-model="selectedCampusComparison" id="compare-campuses">
+          <select
+            v-model="selectedCampusComparison"
+            id="compare-campuses"
+          >
             <option value="1&2">张江校区&滨江校区</option>
           </select>
+        </div>
 
-          <!-- 显示两个校区的考情分析箱型图 -->
-          <div id="score-summary-campuscom" class="chart-container"></div>
+        <!-- 显示两个校区的考情分析箱型图 -->
+        <div
+          id="score-summary-campuscom"
+          class="chart-container"
+        ></div>
 
-          <!-- 显示各题得分表格 -->
-          <div>
-            <h3>各题得分表</h3>
-            <div class="table-container">
-              <table>
+        <!-- 显示各题得分表格 -->
+        <div>
+          <h2>各题得分情况</h2>
+          <div class="table-container">
+            <table>
               <thead>
                 <tr>
                   <th>题号</th>
@@ -126,33 +179,49 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(score, index) in campusComparisonScores" :key="index">
+                <tr
+                  v-for="(score, index) in campusComparisonScores"
+                  :key="index"
+                >
                   <td>{{ score.question }}</td>
                   <td>{{ formatNumber(score.campus1) }}</td>
                   <td>{{ formatNumber(score.campus2) }}</td>
                 </tr>
               </tbody>
             </table>
-            </div>
           </div>
         </div>
       </div>
+    </div>
+    <div
+      v-if="permission === 1"
+      class="stuscore"
+    >
 
+      <div v-if="this.studentScore">
+        <h2>{{ name }} 的总分为{{ this.studentScore }}分</h2>
+      </div>
+    </div>
     <div v-if="permission !==2 ">
-      <div id="score-summary" class="chart-container"></div>
-    
+      <div
+        id="score-summary"
+        class="chart-container"
+      ></div>
       <div>
-        <h2>各题得分表</h2>
+        <h2>各题得分情况</h2>
         <div class="table-container">
           <table>
             <thead>
               <tr>
                 <th>题目</th>
-                <th>得分率</th>
+                <th>各小题得分率</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="item in scoreDistributionData" :key="item.question">
+              <tr
+                v-for="item in scoreDistributionData"
+                :key="item.question"
+              >
                 <td>{{ item.question }}</td>
                 <td>{{ formatNumber(item.avg_score) }}</td>
               </tr>
@@ -163,93 +232,167 @@
     </div>
 
     <div class="images">
-      <img src="/images/PART1_1.png" alt="Image 1" @click="goToPage('Part1_1')" />
-      <img src="/images/PART1_2.png" alt="Image 2" @click="goToPage('Part1_2')" />
-      <img src="/images/PART1_3.png" alt="Image 3" @click="goToPage('Part1_3')" />
-      <img src="/images/PART1_4.png" alt="Image 4" @click="goToPage('Part1_4')" />
-      <img src="/images/PART1_5.png" alt="Image 5" @click="goToPage('Part1_5')" />
-      <img src="/images/PART1_6.png" alt="Image 6" @click="goToPage('Part1_6')" />
-      <img src="/images/PART1_7.png" alt="Image 7" @click="goToPage('Part1_7')" />
-      <img src="/images/PART1_8.png" alt="Image 8" @click="goToPage('Part1_8')" />
-      <img src="/images/PART2_1.png" alt="Image 9" @click="goToPage('Part2_1')" />
-      <img src="/images/PART2_1_1.png" alt="Image 10" @click="goToPage('Part2_2')" />
-      <img src="/images/PART2_1_2.png" alt="Image 11" @click="goToPage('Part2_2')" />
-      <img src="/images/PART2_3.png" alt="Image 12" @click="goToPage('Part2_3')" />
-      <img src="/images/PART2_4.png" alt="Image 13" @click="goToPage('Part2_4')" />
-      <img src="/images/PART2_5.png" alt="Image 14" @click="goToPage('Part2_5')" />
-      <img src="/images/PART2_6.png" alt="Image 15" @click="goToPage('Part2_6')" />
-      <img src="/images/PART2_7.png" alt="Image 16" @click="goToPage('Part2_7')" />
-      <img src="/images/PART2_8.png" alt="Image 17" @click="goToPage('Part2_8')" />
-      <img src="/images/PART2_9.png" alt="Image 18" @click="goToPage('Part2_9')" />
-<!--      <img src="@/assets/PART1_1.png" alt="Image 1" @click="goToPage('Part1_1')" />-->
-<!--      <img src="@/assets/PART1_2.png" alt="Image 2" @click="goToPage('Part1_2')" />-->
-<!--      <img src="@/assets/PART1_3.png" alt="Image 3" @click="goToPage('Part1_3')" />-->
-<!--      <img src="@/assets/PART1_4.png" alt="Image 4" @click="goToPage('Part1_4')" />-->
-<!--      <img src="@/assets/PART1_5.png" alt="Image 5" @click="goToPage('Part1_5')" />-->
-<!--      <img src="@/assets/PART1_6.png" alt="Image 6" @click="goToPage('Part1_6')" />-->
-<!--      <img src="@/assets/PART1_7.png" alt="Image 7" @click="goToPage('Part1_7')" />-->
-<!--      <img src="@/assets/PART1_8.png" alt="Image 8" @click="goToPage('Part1_8')" />-->
-<!--      <img src="@/assets/PART2_1.png" alt="Image 9" @click="goToPage('Part2_1')" />-->
-<!--      <img src="@/assets/PART2_1_1.png" alt="Image 10" @click="goToPage('Part2_2')" />-->
-<!--      <img src="@/assets/PART2_1_2.png" alt="Image 11" @click="goToPage('Part2_2')" />-->
-<!--      <img src="@/assets/PART2_3.png" alt="Image 12" @click="goToPage('Part2_3')" />-->
-<!--      <img src="@/assets/PART2_4.png" alt="Image 13" @click="goToPage('Part2_4')" />-->
-<!--      <img src="@/assets/PART2_5.png" alt="Image 14" @click="goToPage('Part2_5')" />-->
-<!--      <img src="@/assets/PART2_6.png" alt="Image 15" @click="goToPage('Part2_6')" />-->
-<!--      <img src="@/assets/PART2_7.png" alt="Image 16" @click="goToPage('Part2_7')" />-->
-<!--      <img src="@/assets/PART2_8.png" alt="Image 17" @click="goToPage('Part2_8')" />-->
-<!--      <img src="@/assets/PART2_9.png" alt="Image 18" @click="goToPage('Part2_9')" />-->
+
+      <img
+        src="/images/PART1_1.png"
+        alt="Image 1"
+        @click="goToPage('Part1_1')"
+      />
+      <img
+        src="/images/PART1_2.png"
+        alt="Image 2"
+        @click="goToPage('Part1_2')"
+      />
+      <img
+        src="/images/PART1_3.png"
+        alt="Image 3"
+        @click="goToPage('Part1_3')"
+      />
+      <img
+        src="/images/PART1_4.png"
+        alt="Image 4"
+        @click="goToPage('Part1_4')"
+      />
+      <img
+        src="/images/PART1_5.png"
+        alt="Image 5"
+        @click="goToPage('Part1_5')"
+      />
+      <img
+        src="/images/PART1_6.png"
+        alt="Image 6"
+        @click="goToPage('Part1_6')"
+      />
+      <img
+        src="/images/PART1_7.png"
+        alt="Image 7"
+        @click="goToPage('Part1_7')"
+      />
+      <img
+        src="/images/PART1_8.png"
+        alt="Image 8"
+        @click="goToPage('Part1_8')"
+      />
+      <img
+        src="/images/PART2_1.png"
+        alt="Image 9"
+        @click="goToPage('Part2_1')"
+      />
+      <img
+        src="/images/PART2_1_1.png"
+        alt="Image 10"
+        @click="goToPage('Part2_2')"
+      />
+      <img
+        src="/images/PART2_1_2.png"
+        alt="Image 11"
+        @click="goToPage('Part2_2')"
+      />
+      <img
+        src="/images/PART2_3.png"
+        alt="Image 12"
+        @click="goToPage('Part2_3')"
+      />
+      <img
+        src="/images/PART2_4.png"
+        alt="Image 13"
+        @click="goToPage('Part2_4')"
+      />
+      <img
+        src="/images/PART2_5.png"
+        alt="Image 14"
+        @click="goToPage('Part2_5')"
+      />
+      <img
+        src="/images/PART2_6.png"
+        alt="Image 15"
+        @click="goToPage('Part2_6')"
+      />
+      <img
+        src="/images/PART2_7.png"
+        alt="Image 16"
+        @click="goToPage('Part2_7')"
+      />
+      <img
+        src="/images/PART2_8.png"
+        alt="Image 17"
+        @click="goToPage('Part2_8')"
+      />
+      <img
+        src="/images/PART2_9.png"
+        alt="Image 18"
+        @click="goToPage('Part2_9')"
+      />
+      <!--      <img src="@/assets/PART1_1.png" alt="Image 1" @click="goToPage('Part1_1')" />-->
+      <!--      <img src="@/assets/PART1_2.png" alt="Image 2" @click="goToPage('Part1_2')" />-->
+      <!--      <img src="@/assets/PART1_3.png" alt="Image 3" @click="goToPage('Part1_3')" />-->
+      <!--      <img src="@/assets/PART1_4.png" alt="Image 4" @click="goToPage('Part1_4')" />-->
+      <!--      <img src="@/assets/PART1_5.png" alt="Image 5" @click="goToPage('Part1_5')" />-->
+      <!--      <img src="@/assets/PART1_6.png" alt="Image 6" @click="goToPage('Part1_6')" />-->
+      <!--      <img src="@/assets/PART1_7.png" alt="Image 7" @click="goToPage('Part1_7')" />-->
+      <!--      <img src="@/assets/PART1_8.png" alt="Image 8" @click="goToPage('Part1_8')" />-->
+      <!--      <img src="@/assets/PART2_1.png" alt="Image 9" @click="goToPage('Part2_1')" />-->
+      <!--      <img src="@/assets/PART2_1_1.png" alt="Image 10" @click="goToPage('Part2_2')" />-->
+      <!--      <img src="@/assets/PART2_1_2.png" alt="Image 11" @click="goToPage('Part2_2')" />-->
+      <!--      <img src="@/assets/PART2_3.png" alt="Image 12" @click="goToPage('Part2_3')" />-->
+      <!--      <img src="@/assets/PART2_4.png" alt="Image 13" @click="goToPage('Part2_4')" />-->
+      <!--      <img src="@/assets/PART2_5.png" alt="Image 14" @click="goToPage('Part2_5')" />-->
+      <!--      <img src="@/assets/PART2_6.png" alt="Image 15" @click="goToPage('Part2_6')" />-->
+      <!--      <img src="@/assets/PART2_7.png" alt="Image 16" @click="goToPage('Part2_7')" />-->
+      <!--      <img src="@/assets/PART2_8.png" alt="Image 17" @click="goToPage('Part2_8')" />-->
+      <!--      <img src="@/assets/PART2_9.png" alt="Image 18" @click="goToPage('Part2_9')" />-->
     </div>
   </div>
 </template>
 
 <script>
-import * as echarts from 'echarts';
-import axios from 'axios';
+import * as echarts from "echarts";
+import axios from "axios";
 
 export default {
-  name: 'HomePage',
+  name: "HomePage",
   props: {
     name: {
       type: String,
-      required: true
+      required: true,
     },
     permission: {
       type: Number,
-      required: true
-    }
+      required: true,
+    },
   },
   data() {
     return {
-      analysisType: '0',// Default to "全校分析"
-      selectedClass: '1_1', //单个班级
+      analysisType: "0", // Default to "全校分析"
+      selectedClass: "1_1", //单个班级
       scoreDistributionData: [],
       scoreDistributionTotal: [],
       classes: [],
-      selectedAnalysisType: 'single',//分析类型：单个还是爽哥
-      selectedComparison: '', //双个班级
-      selectedCampusComparison: '',
-      boxplotOptionSingle: {},  //单个箱型图
+      selectedAnalysisType: "single", //分析类型：单个还是爽哥
+      selectedComparison: "", //双个班级
+      selectedCampusComparison: "",
+      boxplotOptionSingle: {}, //单个箱型图
       boxplotOptionComparison: {}, //双箱型图
       boxplotOptionCampusComparison: {}, //两个校区的箱型图
-      comparisonScores: [], 
+      comparisonScores: [],
       singleClassScores: [],
       campusComparisonScores: [],
+      studentScore: null,
     };
   },
   computed: {
     permissionLabel() {
       switch (this.permission) {
         case 0:
-          return '老师';
+          return "老师";
         case 1:
-          return '学生';
+          return "学生";
         case 2:
-          return '管理员';
+          return "管理员";
         default:
-          return '未知';
+          return "未知";
       }
-    }
+    },
   },
   watch: {
     selectedSingleClass(newVal) {
@@ -271,28 +414,49 @@ export default {
   methods: {
     getClassName(classCode) {
       const classNames = {
-        '1_1': '张江一班',
-        '1_2': '张江二班',
-        '1_3': '张江三班',
-        '2_1': '滨江一班',
-        '2_2': '滨江二班',
-        '2_3': '滨江三班',
-        '1': '张江校区',
-        '2': '滨江校区'
+        "1_1": "张江一班",
+        "1_2": "张江二班",
+        "1_3": "张江三班",
+        "2_1": "滨江一班",
+        "2_2": "滨江二班",
+        "2_3": "滨江三班",
+        1: "张江校区",
+        2: "滨江校区",
       };
-      return classNames[classCode] || '未知班级';
+      return classNames[classCode] || "未知班级";
     },
 
     async fetchTeacherClasses() {
       try {
-        const response = await axios.get('http://localhost:3000/api/teacher-classes', {
-          params: { name: this.name }
-        });
+        const response = await axios.get(
+          "http://localhost:3000/api/teacher-classes",
+          {
+            params: { name: this.name },
+          }
+        );
 
         this.classes = response.data.classes;
         console.log("班级", this.classes);
       } catch (error) {
-        console.error('Error fetching teacher classes:', error);
+        console.error("Error fetching teacher classes:", error);
+      }
+    },
+    async fetchStuScore() {
+      if (this.permission === 1) {
+        try {
+          const StuScoreResponse = await axios.get(
+            "http://localhost:3000/api/student-total-score",
+            {
+              params: { name: this.name },
+            }
+          );
+          // 提取 score 字段
+          const StuScore = StuScoreResponse.data.scores.score; // 修改这里提取分数
+          this.studentScore = StuScore;
+          console.log(this.studentScore);
+        } catch (error) {
+          console.error("获取学生成绩失败:", error);
+        }
       }
     },
     goToPage(page) {
@@ -300,8 +464,8 @@ export default {
         name: page,
         query: {
           name: this.name,
-          permission: this.permission
-        }
+          permission: this.permission,
+        },
       });
     },
 
@@ -314,7 +478,7 @@ export default {
 
     // 用于保留两位小数
     formatNumber(value) {
-      return value.toFixed(2); 
+      return value.toFixed(2);
     },
 
     //用于对于学生端、管理员端、教师端使用，返回单一班级的数据
@@ -342,26 +506,30 @@ export default {
         const formattedClass = this.formatClass(this.selectedClass);
         url_score = `http://localhost:3000/api/admin-scores?name=${this.name}&class=${formattedClass}`;
       }
-      
-      console.log('Fetching data from URL:', url);
+
+      console.log("Fetching data from URL:", url);
 
       fetch(url)
-        .then(response => response.json())
-        .then(data => {
-          console.log('Score Summary Data:', data);
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Score Summary Data:", data);
           this.renderScoreSummary(data);
         })
-        .catch(error => console.error('Fetching score summary failed:', error));
+        .catch((error) =>
+          console.error("Fetching score summary failed:", error)
+        );
 
       fetch(url_score)
-        .then(response => response.json())
-        .then(data => {
+        .then((response) => response.json())
+        .then((data) => {
           console.log("Total Score Data:", data);
           if (data && data.averages) {
-            this.scoreDistributionData = Object.keys(data.averages).map(key => ({
-              question: key,
-              avg_score: data.averages[key],
-            }));
+            this.scoreDistributionData = Object.keys(data.averages).map(
+              (key) => ({
+                question: key,
+                avg_score: data.averages[key],
+              })
+            );
           } else {
             this.scoreDistributionData = [];
           }
@@ -369,15 +537,17 @@ export default {
           console.log("赋值之后", this.scoreDistributionData);
         });
 
-        fetch(url_score)
-        .then(response => response.json())
-        .then(data => {
+      fetch(url_score)
+        .then((response) => response.json())
+        .then((data) => {
           console.log("Total Score Data:", data);
           if (data && data.totals) {
-            this.scoreDistributionTotal = Object.keys(data.totals).map(key => ({
-              question: key,
-              total: data.totals[key],
-            }));
+            this.scoreDistributionTotal = Object.keys(data.totals).map(
+              (key) => ({
+                question: key,
+                total: data.totals[key],
+              })
+            );
           } else {
             this.scoreDistributionTotal = [];
           }
@@ -388,102 +558,122 @@ export default {
 
     ///返回两个班级对比的考情情况以及成绩
     fetchComparisonData(comparison) {
-      const [class1, class2] = comparison.split('&');
-      let url = '';
-      let url_score = '';
+      const [class1, class2] = comparison.split("&");
+      let url = "";
+      let url_score = "";
       if (this.permission === 2) {
         url = `http://localhost:3000/api/admin-score-summary?name=${this.name}&class=${class1}`;
         url_score = `http://localhost:3000/api/admin-scores?name=${this.name}&class=${class1}`;
       }
 
-      axios.get(url)
-        .then(response => {
+      axios
+        .get(url)
+        .then((response) => {
           const data1 = response.data;
-          return axios.get(`http://localhost:3000/api/admin-score-summary?name=${this.name}&class=${class2}`)
-            .then(response => {
+          return axios
+            .get(
+              `http://localhost:3000/api/admin-score-summary?name=${this.name}&class=${class2}`
+            )
+            .then((response) => {
               const data2 = response.data;
-              this.boxplotOptionComparison = this.renderScoreSummaryCom(data1, data2);
+              this.boxplotOptionComparison = this.renderScoreSummaryCom(
+                data1,
+                data2
+              );
               //this.comparisonScores = this.fetchComparisonScores(class1, class2);
             });
         })
-        .catch(error => {
-          console.error('Fetching comparison data failed:', error);
+        .catch((error) => {
+          console.error("Fetching comparison data failed:", error);
         });
 
-        axios.get(url_score)
-        .then(response => {
+      axios
+        .get(url_score)
+        .then((response) => {
           const data1 = response.data;
-          return axios.get(`http://localhost:3000/api/admin-scores?name=${this.name}&class=${class2}`)
-            .then(response => {
+          return axios
+            .get(
+              `http://localhost:3000/api/admin-scores?name=${this.name}&class=${class2}`
+            )
+            .then((response) => {
               const data2 = response.data;
               //this.boxplotOptionComparison = this.renderScoreSummaryCom(data1, data2);
               const scores1 = data1.averages || {};
               const scores2 = data2.averages || {};
 
               // 组合数据以便比较
-              const combinedScores = Object.keys(scores1).map(key => ({
+              const combinedScores = Object.keys(scores1).map((key) => ({
                 question: key,
                 class1: scores1[key] || 0,
-                class2: scores2[key] || 0
+                class2: scores2[key] || 0,
               }));
 
               // 更新组件的状态
               this.comparisonScores = combinedScores;
             });
         })
-        .catch(error => {
-          console.error('Fetching comparison data failed:', error);
+        .catch((error) => {
+          console.error("Fetching comparison data failed:", error);
         });
     },
 
-
-
     ////返回两个校区的考情成绩数据
     fetchCampusComparisonData(comparison) {
-      const [school1, school2] = comparison.split('&');
-      let url = '';
-      let url_score = '';
+      const [school1, school2] = comparison.split("&");
+      let url = "";
+      let url_score = "";
       if (this.permission === 2) {
         url = `http://localhost:3000/api/admin-score-summary-campusCom?name=${this.name}&school=${school1}`;
         url_score = `http://localhost:3000/api/admin-scores-campusCom?name=${this.name}&school=${school1}`;
       }
 
-      axios.get(url)
-        .then(response => {
+      axios
+        .get(url)
+        .then((response) => {
           const data1 = response.data;
-          return axios.get(`http://localhost:3000/api/admin-score-summary-campusCom?name=${this.name}&school=${school2}`)
-            .then(response => {
+          return axios
+            .get(
+              `http://localhost:3000/api/admin-score-summary-campusCom?name=${this.name}&school=${school2}`
+            )
+            .then((response) => {
               const data2 = response.data;
-              this.boxplotOptionComparison = this.renderScoreSummaryCampusCom(data1, data2);
+              this.boxplotOptionComparison = this.renderScoreSummaryCampusCom(
+                data1,
+                data2
+              );
               //this.comparisonScores = this.fetchComparisonScores(class1, class2);
             });
         })
-        .catch(error => {
-          console.error('Fetching comparison data failed:', error);
+        .catch((error) => {
+          console.error("Fetching comparison data failed:", error);
         });
 
-        axios.get(url_score)
-        .then(response => {
+      axios
+        .get(url_score)
+        .then((response) => {
           const data1 = response.data;
-          return axios.get(`http://localhost:3000/api/admin-scores-campusCom?name=${this.name}&school=${school2}`)
-            .then(response => {
+          return axios
+            .get(
+              `http://localhost:3000/api/admin-scores-campusCom?name=${this.name}&school=${school2}`
+            )
+            .then((response) => {
               const data2 = response.data;
               const scores1 = data1.averages || {};
               const scores2 = data2.averages || {};
 
               // 组合数据以便比较
-              const combinedScores = Object.keys(scores1).map(key => ({
+              const combinedScores = Object.keys(scores1).map((key) => ({
                 question: key,
                 campus1: scores1[key] || 0,
-                campus2: scores2[key] || 0
+                campus2: scores2[key] || 0,
               }));
 
               // 更新组件的状态
               this.campusComparisonScores = combinedScores;
             });
         })
-        .catch(error => {
-          console.error('Fetching comparison data failed:', error);
+        .catch((error) => {
+          console.error("Fetching comparison data failed:", error);
         });
 
       //if (this.permission === 2) {
@@ -493,14 +683,14 @@ export default {
 
     //单个班级的考情分析--箱线图
     renderScoreSummary(data) {
-      var mainContainer = document.getElementById('score-summary');
+      var mainContainer = document.getElementById("score-summary");
       var resizeMainContainer = function () {
-        mainContainer.style.width = window.innerWidth + 'px';
-        mainContainer.style.height = window.innerHeight * 0.8 + 'px';
+        mainContainer.style.width = window.innerWidth + "px";
+        mainContainer.style.height = window.innerHeight * 0.6 + "px";
       };
       resizeMainContainer();
       var myChart = echarts.init(mainContainer);
-      window.addEventListener('resize', function () {
+      window.addEventListener("resize", function () {
         resizeMainContainer();
         myChart.resize();
       });
@@ -508,293 +698,446 @@ export default {
       // 整理数据为箱线图格式
       var boxplotData = [
         [
-          data.min_score,      // 最小值
-          data.q1_score,       // 第一四分位数
-          data.median_score,   // 中位数
-          data.q3_score,       // 第三四分位数
-          data.max_score       // 最大值
-        ]
+          data.min_score, // 最小值
+          data.q1_score, // 第一四分位数
+          data.median_score, // 中位数
+          data.q3_score, // 第三四分位数
+          data.max_score, // 最大值
+        ],
       ];
 
       var option = {
         title: {
-          text: '    考情分析'
+          text: "考情分析",
+          textStyle: {
+            fontSize: 24, // 设置字体大小为与 h2 相同
+            fontWeight: "bold", // 设置字体粗细为与 h2 相同
+            textAlign: "center",
+          },
+          left: "center",
         },
         tooltip: {
-          trigger: 'item',
+          trigger: "item",
           formatter: function (params) {
             return [
-              '最大值: ' + params.data[4],
-              '上四分位数: ' + params.data[3],
-              '中位数: ' + params.data[2],
-              '下四分位数: ' + params.data[1],
-              '最小值: ' + params.data[0]
-            ].join('<br/>');
-          }
+              "最大值: " + params.data[4],
+              "上四分位数: " + params.data[3],
+              "中位数: " + params.data[2],
+              "下四分位数: " + params.data[1],
+              "最小值: " + params.data[0],
+            ].join("<br/>");
+          },
         },
         xAxis: {
-          type: 'category',
-          data: ['考情数据'],
+          type: "category",
+          data: ["考情数据"],
           axisLabel: {
-            interval: 0
-          }
+            interval: 0,
+          },
+          show: false,
         },
         yAxis: {
-          type: 'value'
+          type: "value",
         },
         series: [
           {
-            name: '分数分布',
-            type: 'boxplot',
+            name: "分数分布",
+            type: "boxplot",
             data: boxplotData,
             tooltip: {
               formatter: function (param) {
                 return [
-                  '最大值: ' + param.data[5],
-                  '上四分位数: ' + param.data[4],
-                  '中位数: ' + param.data[3],
-                  '下四分位数: ' + param.data[2],
-                  '最小值: ' + param.data[1]
-                ].join('<br/>');
-              }
-            }
-          }
-        ]
+                  "最高分: " + param.data[5],
+                  "上四分位数: " + param.data[4],
+                  "中位数: " + param.data[3],
+                  "下四分位数: " + param.data[2],
+                  "最低分: " + param.data[1],
+                ].join("<br/>");
+              },
+            },
+          },
+        ],
       };
       myChart.setOption(option);
     },
 
     //两个班级对比的考情分析
     renderScoreSummaryCom(data, data2) {
-      var mainContainer = document.getElementById('score-summary-com');
+      var mainContainer = document.getElementById("score-summary-com");
       var resizeMainContainer = function () {
-        mainContainer.style.width = (window.innerWidth) + 'px';
-        mainContainer.style.height = (window.innerHeight * 0.75) + 'px';
+        mainContainer.style.width = window.innerWidth + "px";
+        mainContainer.style.height = window.innerHeight * 0.7 + "px";
       };
       resizeMainContainer();
       var myChart = echarts.init(mainContainer);
-      window.addEventListener('resize', function () {
+      window.addEventListener("resize", function () {
         resizeMainContainer();
         myChart.resize();
       });
 
-      var classNames = this.selectedComparison.split('&').map(classKey => this.getClassName(classKey));
+      var classNames = this.selectedComparison
+        .split("&")
+        .map((classKey) => this.getClassName(classKey));
       console.log("所要查询的班级", classNames);
 
       // 整理数据为箱线图格式
       var boxplotData = [
         [
-          data.min_score,      // 最小值
-          data.q1_score,       // 第一四分位数
-          data.median_score,   // 中位数
-          data.q3_score,       // 第三四分位数
-          data.max_score       // 最大值
+          data.min_score, // 最小值
+          data.q1_score, // 第一四分位数
+          data.median_score, // 中位数
+          data.q3_score, // 第三四分位数
+          data.max_score, // 最大值
         ],
         [
-          data2.min_score,     // 最小值
-          data2.q1_score,      // 第一四分位数
-          data2.median_score,  // 中位数
-          data2.q3_score,      // 第三四分位数
-          data2.max_score      // 最大值
-        ]
+          data2.min_score, // 最小值
+          data2.q1_score, // 第一四分位数
+          data2.median_score, // 中位数
+          data2.q3_score, // 第三四分位数
+          data2.max_score, // 最大值
+        ],
       ];
 
       var option = {
         title: {
-          text: '    考情分析对比'
+          text: "考情分析对比",
+          textStyle: {
+            fontSize: 24, // 设置字体大小为与 h2 相同
+            fontWeight: "bold", // 设置字体粗细为与 h2 相同
+            textAlign: "center",
+          },
+          left: "center",
         },
         tooltip: {
-          trigger: 'item',
+          trigger: "item",
           formatter: function (params) {
             return [
-              '班级 ' + classNames[0],
-              '最大值: ' + params.data[5],
-              '上四分位数: ' + params.data[4],
-              '中位数: ' + params.data[3],
-              '下四分位数: ' + params.data[2],
-              '最小值: ' + params.data[1]
-            ].join('<br/>');
-          }
+              "班级 " + classNames[0],
+              "最高分: " + params.data[5],
+              "上四分位数: " + params.data[4],
+              "中位数: " + params.data[3],
+              "下四分位数: " + params.data[2],
+              "最低分: " + params.data[1],
+            ].join("<br/>");
+          },
         },
-        
+
         xAxis: {
-          type: 'category',
-          data: [classNames[0], classNames[1]], // 使用班级名称作为x轴数据
+          type: "category",
+          data: [], // 使用班级名称作为x轴数据
           boundaryGap: true,
           nameGap: 30,
           splitArea: {
-            show: false
+            show: false,
           },
           axisTick: {
-            alignWithLabel: true
-          }
+            alignWithLabel: true,
+          },
+          show: false,
         },
 
         yAxis: {
-          type: 'value'
+          type: "value",
         },
         series: [
           {
             name: classNames[0],
-            type: 'boxplot',
+            type: "boxplot",
             data: [boxplotData[0]],
             tooltip: {
               formatter: function (param) {
                 return [
-                  '最大值: ' + param.data[5],
-                  '上四分位数: ' + param.data[4],
-                  '中位数: ' + param.data[3],
-                  '下四分位数: ' + param.data[2],
-                  '最小值: ' + param.data[1]
-                ].join('<br/>');
-              }
-            }
+                  "班级：" + classNames[0],
+                  "最高分: " + param.data[5],
+                  "上四分位数: " + param.data[4],
+                  "中位数: " + param.data[3],
+                  "下四分位数: " + param.data[2],
+                  "最低分: " + param.data[1],
+                ].join("<br/>");
+              },
+            },
           },
           {
             name: classNames[1],
-            type: 'boxplot',
+            type: "boxplot",
             data: [boxplotData[1]],
             tooltip: {
               formatter: function (param) {
                 return [
-                  '最大值: ' + param.data[5],
-                  '上四分位数: ' + param.data[4],
-                  '中位数: ' + param.data[3],
-                  '下四分位数: ' + param.data[2],
-                  '最小值: ' + param.data[1]
-                ].join('<br/>');
-              }
-            }
-          }
-        ]
+                  "班级：" + classNames[1],
+                  "最高分: " + param.data[5],
+                  "上四分位数: " + param.data[4],
+                  "中位数: " + param.data[3],
+                  "下四分位数: " + param.data[2],
+                  "最低分: " + param.data[1],
+                ].join("<br/>");
+              },
+            },
+          },
+        ],
       };
       myChart.setOption(option);
     },
 
     renderScoreSummaryCampusCom(data, data2) {
-      var mainContainer = document.getElementById('score-summary-campuscom');
+      var mainContainer = document.getElementById("score-summary-campuscom");
       var resizeMainContainer = function () {
-        mainContainer.style.width = window.innerWidth + 'px';
-        mainContainer.style.height = window.innerHeight * 0.8 + 'px';
+        mainContainer.style.width = window.innerWidth + "px";
+        mainContainer.style.height = window.innerHeight * 0.7 + "px";
       };
       resizeMainContainer();
       var myChart = echarts.init(mainContainer);
-      window.addEventListener('resize', function () {
+      window.addEventListener("resize", function () {
         resizeMainContainer();
         myChart.resize();
       });
-      
+
       console.log("两个校区的数据能否收到", data, data2);
 
       // 整理数据为箱线图格式
       var boxplotData = [
         [
-          data.min_score,      // 最小值
-          data.q1_score,       // 第一四分位数
-          data.median_score,   // 中位数
-          data.q3_score,       // 第三四分位数
-          data.max_score       // 最大值
+          data.min_score, // 最小值
+          data.q1_score, // 第一四分位数
+          data.median_score, // 中位数
+          data.q3_score, // 第三四分位数
+          data.max_score, // 最大值
         ],
         [
-          data2.min_score,     // 最小值
-          data2.q1_score,      // 第一四分位数
-          data2.median_score,  // 中位数
-          data2.q3_score,      // 第三四分位数
-          data2.max_score      // 最大值
-        ]
+          data2.min_score, // 最小值
+          data2.q1_score, // 第一四分位数
+          data2.median_score, // 中位数
+          data2.q3_score, // 第三四分位数
+          data2.max_score, // 最大值
+        ],
       ];
 
       var option = {
         title: {
-          text: '    考情分析对比'
+          text: "考情分析对比",
+          textStyle: {
+            fontSize: 24, // 设置字体大小为与 h2 相同
+            fontWeight: "bold", // 设置字体粗细为与 h2 相同
+            textAlign: "center",
+          },
+
+          left: "center",
         },
         tooltip: {
-          trigger: 'item',
+          trigger: "item",
           formatter: function (param) {
             return [
-              '校区 ' + '张江',
-              '最大值: ' + param.data[5],
-              '上四分位数: ' + param.data[4],
-              '中位数: ' + param.data[3],
-              '下四分位数: ' + param.data[2],
-              '最小值: ' + param.data[1]
-            ].join('<br/>');
-          }
+              "校区 " + "张江",
+              "最高分: " + param.data[5],
+              "上四分位数: " + param.data[4],
+              "中位数: " + param.data[3],
+              "下四分位数: " + param.data[2],
+              "最低分: " + param.data[1],
+            ].join("<br/>");
+          },
         },
+
         xAxis: {
-          type: 'category',
-          data: ['张江', '滨江'] // 你可以根据需要自定义数据
+          type: "category",
+          data: [], // 你可以根据需要自定义数据
+          boundaryGap: true,
+          nameGap: 30,
+          splitArea: {
+            show: true,
+          },
+          axisLabel: {
+            formatter: "{value}",
+          },
+          splitLine: {
+            show: false,
+          },
+          show: false,
         },
         yAxis: {
-          type: 'value'
+          type: "value",
         },
         series: [
           {
-            name: '张江',
-            type: 'boxplot',
+            name: "张江",
+            type: "boxplot",
             data: [boxplotData[0]],
             tooltip: {
               formatter: function (param) {
                 return [
-                  '最大值: ' + param.data[5],
-                  '上四分位数: ' + param.data[4],
-                  '中位数: ' + param.data[3],
-                  '下四分位数: ' + param.data[2],
-                  '最小值: ' + param.data[1]
-                ].join('<br/>');
-              }
-            }
+                  "校区：" + "张江",
+                  "最高分: " + param.data[5],
+                  "上四分位数: " + param.data[4],
+                  "中位数: " + param.data[3],
+                  "下四分位数: " + param.data[2],
+                  "最低分: " + param.data[1],
+                ].join("<br/>");
+              },
+            },
           },
           {
-            name: '滨江',
-            type: 'boxplot',
+            name: "滨江",
+            type: "boxplot",
             data: [boxplotData[1]],
             tooltip: {
               formatter: function (param) {
                 return [
-                  '最大值: ' + param.data[5],
-                  '上四分位数: ' + param.data[4],
-                  '中位数: ' + param.data[3],
-                  '下四分位数: ' + param.data[2],
-                  '最小值: ' + param.data[1]
-                ].join('<br/>');
-              }
-            }
-          }
-        ]
+                  "校区：" + "滨江",
+                  "最高分: " + param.data[5],
+                  "上四分位数: " + param.data[4],
+                  "中位数: " + param.data[3],
+                  "下四分位数: " + param.data[2],
+                  "最低分: " + param.data[1],
+                ].join("<br/>");
+              },
+            },
+          },
+        ],
       };
       myChart.setOption(option);
     },
-
   },
   mounted() {
     this.fetchData();
-  }
+    this.fetchStuScore();
+  },
 };
 </script>
 
 <style scoped>
 .container {
-  display: flex;
+  /* display: flex; */
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   justify-content: flex-start;
-  height: 100vh;
+  background-color: white;
+  height: 100vh; /* 高度设置为视口高度 */
+  width: 100%; /* 宽度设置为 100% */
   margin: 0;
   padding: 20px;
   box-sizing: border-box;
 }
 
-h1 {
-  text-align: center;
-  color: #333;
+.header1 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 20px;
+  background-color: #6de4c6;
+  padding: 10px;
+  border-radius: 8px;
 }
 
-p {
-  text-align: center;
-  margin: 10px 0;
+.header1 h1 {
+  margin: 0;
+  font-weight: bold;
+  color: #cdfde7;
+  font-size: 24px;
+}
+.header1 p {
+  margin: 0;
+  font-weight: bold;
+  color: #cdfde7;
+  font-size: 24px;
+}
+.header1 .id {
+  color: white;
+}
+.teacherchoose {
+  display: flex;
+  align-items: center; /* 垂直居中对齐子元素 */
+  gap: 10px; /* 子元素之间的间距 */
+  width: 25%;
+  margin-bottom: 20px;
+  background-color: #6de4c6;
+  padding: 10px;
+  border-radius: 8px;
+  color: #cdfde7;
+  font-weight: bold;
 }
 
+.teacherchoose .fetch-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  background-color: #6de4c6; /* 按钮背景色 */
+  color: #cdfde7; /* 按钮文字颜色 */
+  font-weight: bold;
+  font-size: 20px;
+  height: 40px;
+  cursor: pointer; /* 鼠标悬停时的光标样式 */
+  margin-bottom: 0; /* 按钮与下方元素的间距 */
+  transition: background-color 0.3s ease; /* 背景色过渡效果 */
+  height: 40px; /* 按钮高度 */
+  display: flex; /* 使按钮的内容水平垂直居中 */
+  align-items: center;
+  justify-content: center;
+}
+
+.teacherchoose .fetch-button:hover {
+  background-color: #64c9af; /* 悬停时的背景色 */
+}
+
+.teacherchoose select {
+  padding: 8px;
+  border-radius: 4px; /* 圆角边框 */
+  background-color: #6de4c6; /* 背景色 */
+  color: #cdfde7; /* 字体颜色 */
+  border: 1px solid #aaa;
+  width: 50%; /* 填满容器的宽度 */
+  max-width: 300px; /* 最大宽度 */
+  height: 40px; /* 设置与按钮相同的高度 */
+  display: flex; /* 使 select 的内容水平垂直居中 */
+  align-items: center;
+  font-size: 16px;
+  justify-content: center;
+}
+.label1 {
+  display: flex;
+  align-items: center;
+  width: 25%;
+  margin-bottom: 20px;
+  background-color: #6de4c6;
+  padding: 10px;
+  border-radius: 8px;
+  color: #cdfde7;
+  font-weight: bold;
+}
+.label2 {
+  display: flex;
+
+  align-items: center;
+  width: 25%;
+  margin-bottom: 20px;
+  background-color: #6de4c6;
+  padding: 10px;
+  border-radius: 8px;
+  color: #cdfde7;
+  font-weight: bold;
+}
+.label3 {
+  display: flex;
+
+  align-items: center;
+  width: 25%;
+  margin-bottom: 20px;
+  background-color: #6de4c6;
+  padding: 10px;
+  border-radius: 8px;
+  color: #cdfde7;
+  font-weight: bold;
+}
+.label4 {
+  display: flex;
+  align-items: center;
+  width: 25%;
+  margin-bottom: 20px;
+  background-color: #6de4c6;
+  padding: 10px;
+  border-radius: 8px;
+  color: #cdfde7;
+  font-weight: bold;
+}
 .images {
   display: flex;
   flex-wrap: wrap;
@@ -813,8 +1156,18 @@ p {
   cursor: pointer;
   margin: 8px;
 }
-
-
+.admin select {
+  color: #ffffff; /* 字体颜色，黑色 */
+  background-color: #6de4c6; /* 背景颜色，白色 */
+  border: 1px solid #aaa; /* 边框颜色，灰色 */
+  border-radius: 4px; /* 圆角边框 */
+  font-weight: bold; /* 加粗字体 */
+}
+h2 {
+  margin: 0%;
+  text-align: center;
+  margin-bottom: 20px;
+}
 .chart-container {
   width: 80%;
   height: 300px;
@@ -826,6 +1179,7 @@ p {
   overflow-y: auto; /* 竖向滚动 */
   border: 1px solid #ddd; /* 可选，给容器添加边框 */
   display: flex;
+  background-color: white;
   justify-content: center; /* 水平居中 */
 }
 
@@ -837,20 +1191,33 @@ table {
   background-color: #f9f9f9;
 }
 
-
-th, td {
+th,
+td {
   border: 1px solid #ddd;
   padding: 8px;
+  background-color: white;
   text-align: left;
 }
 
 th {
-  background-color: #f2f2f2;
+  background-color: white;
 }
 
 .analysis-type {
   margin-left: 20px;
   white-space: nowrap;
 }
-
+.stuscore {
+  align-items: center;
+  width: 25%;
+  height: 30px;
+  margin-bottom: 20px;
+  background-color: #6de4c6;
+  padding: 10px;
+  font-size: 12px;
+  text-align: justify;
+  border-radius: 8px;
+  color: #cdfde7;
+  font-weight: bold;
+}
 </style>

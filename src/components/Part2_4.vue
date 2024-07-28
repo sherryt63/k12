@@ -1,5 +1,6 @@
 <template>
     <div>
+      <header class="header">
         <h2>Ⅳ. Read and circle（读一读，选择最佳答案，将字母代号写在前面的括号内）：【语法-句法】</h2>
 
         <div v-if="permission === '2'" class="class-select">
@@ -20,65 +21,79 @@
                 <option v-for="cls in classOptions" :key="cls" :value="cls">{{ getClassDisplayName(cls) }}</option>
             </select>
         </div>
+      </header>
+       <div v-for="(question, index) in questions" :key="index">
+     <div class="part-background">
+      
+      <!-- 显示图片和难度 -->
+      <div class="question-wrapper">  
+        <div class="left-column"> 
+          <!--题号+难度-->
+          <div class="title">
+            <p :class="{highlighted: permission === '1' && questionData[question]?.studentAnswer !== questionData[question]?.correctAnswer }">
+              {{ index + 1 }}、 {{ staticData[question]?.difficulty }}</p>
+          </div>
+      
+          <!--题目描述-->
+          <div v-if="questionDescriptions[question]">
+                <p style="font-size:18px">题目描述：<span v-html="questionDescriptions[question]"></span></p>
+          </div>
+          <!-- 正确答案 -->
+          <div class="corrent_answer">
+            <p style="font-size:18px">正确答案：<span v-html="highlightText(questionData[question]?.correctAnswer, questionData[question]?.correctAnswer)"></span></p>
+          </div>
 
-        <div v-for="(question, index) in questions" :key="index">
-
-
-            <div class="question-container">
-                <p
-                    :class="{ highlighted: permission === '1' && questionData[question]?.studentAnswer !== questionData[question]?.correctAnswer }">
-                    【题目】： {{ index + 1 }}
-                </p>
-            </div>
-
-            <div v-if="questionDescriptions[question]">
-                <p> 【题目描述】</p>
-                <p v-html="questionDescriptions[question]"></p>
-            </div>
-
-            <!-- 显示图片和难度 -->
-            <div>
-                <!-- 显示选项 -->
-                <div v-for="(option, optIndex) in options" :key="optIndex">
-                    <p v-html="highlightText(option.text, questionData[question]?.correctAnswer)"></p>
-                    <!-- 显示选项人数，只有 permission === '0' 或 permission === '2' 时显示 -->
-                    <p v-if="permission === '0' || permission === '2'">选择人数：{{
-                        questionData[question]?.optionCounts[option.value] || 0 }}</p>
-                </div>
-                <p>【难度】：{{ staticData[question]?.difficulty }}</p>
-            </div>
-
-
-
-            <!-- 根据 permission 显示不同内容 -->
-            <div v-if="permission === '1'" class="peer-accuracy-container">
-                <p> 【同伴正确率】：{{ questionData[question]?.peerAccuracy }}%</p>
-                <p> 【学生答案】：{{ questionData[question]?.studentAnswer }}</p>
-            </div>
-
-
-            <div v-if="permission === '0' || permission === '2'" class="option-percentages-container">
-                <p>【正确人数比】</p>
-                <div>
-                    <!-- 直接显示 optionPercentages 的值 -->
-                    <p>{{ questionData[question]?.optionPercentages || '0' }}</p>
-                </div>
-            </div>
-
-            <!-- 正确答案 -->
-            <div class="corrent_answer">
-                <p>【正确答案】</p>
-                <p v-html="highlightText(questionData[question]?.correctAnswer, questionData[question]?.correctAnswer)"></p>
-            </div>
-
-            <!-- 参考解析 -->
-            <div>
-                <h3>参考解析</h3>
-                <p>{{ questionData[question]?.referenceAnalysis }}</p>
-            </div>
-
-            <hr>
+          <!-- 参考解析 -->
+          <div>
+            <p style="font-size:18px">参考解析：{{ questionData[question]?.referenceAnalysis }}</p>
+          </div>
         </div>
+        <div class="right-column table-container"> 
+
+          <!--教师端、管理员端-->
+          <div v-if="permission === '0' || permission === '2'">
+          <table class="custom-border" border="1" cellspacing="0" width=500px height=160px bgcolor=white>
+            <tbody>
+            <tr>
+              <td style="width: 25%; text-align: center; color: black; font-size:16px">选项</td>
+              <td style="width: 25%; text-align: center; color: black; font-size:16px" v-for="(option, optIndex) in options" :key="optIndex">
+                <span v-html="highlightTextNew(option.text, questionData[question]?.correctAnswer, staticConOption[question]?.confuse)"></span>
+              </td>
+            </tr>
+            <tr>
+              <td style="height: 33.333%; text-align: center; color: black; font-size:16px">选择人数</td>
+              <td style="height: 33.333%; text-align: center; color: black; font-size:16px" v-for="(option, optIndex) in options" :key="optIndex">
+                {{ questionData[question]?.optionCounts[option.value] || 0 }}
+              </td>
+            </tr>
+            <tr>
+              <td colspan=4 style="color: black; font-size:16px"><span class="option-percentages-container">&nbsp;&nbsp;&nbsp;&nbsp;正确率：{{ questionData[question]?.accuracyPercentages || '0' }}%</span></td>
+            </tr>
+            </tbody>
+          </table>
+          </div>
+
+          <!--学生端-->
+          <div v-if="permission === '1'">
+            <table class="custom-border" border="1" cellspacing="0" width=500px height=160px bgcolor=white>
+            <tbody>
+            <tr>
+              <td style="height: 50%; width: 25%; text-align: center; color: black; font-size:16px">选项</td>
+              <td style="width: 25%; text-align: center; color: black; font-size:16px" v-for="(option, optIndex) in options" :key="optIndex">
+                <span v-html="highlightTextNew(option.text, questionData[question]?.correctAnswer, staticConOption[question]?.confuse)"></span>
+              </td>
+            </tr>
+            <tr>
+              <td colspan=4 style="color: black; font-size:16px"><p class="option-percentages-container">&nbsp;&nbsp;&nbsp;&nbsp;学生答案：{{ questionData[question]?.studentAnswer }}</p>
+              <p class="option-percentages-container">&nbsp;&nbsp;&nbsp;&nbsp;同伴正确率：{{ questionData[question]?.peerAccuracy }}%</p></td>
+            </tr>
+            </tbody>
+          </table>
+          </div>
+        </div>
+      </div>
+     </div>
+     </div>
     </div>
 </template>
 
@@ -109,15 +124,27 @@ export default {
             optionCounts: {},
             optionPercentages: {},
             staticData: {
-                'PART2_IV_1': { difficulty: '两颗星' },
-                'PART2_IV_2': { difficulty: '两颗星' },
-                'PART2_IV_3': { difficulty: '两颗星' },
-                'PART2_IV_4': { difficulty: '两颗星' },
-                'PART2_IV_5': { difficulty: '两颗星' },
-                'PART2_IV_6': { difficulty: '两颗星' },
-                'PART2_IV_7': { difficulty: '两颗星' },
-                'PART2_IV_8': { difficulty: '两颗星' },
-                'PART2_IV_9': { difficulty: '两颗星' }
+                'PART2_IV_1': { difficulty: '★★' },
+                'PART2_IV_2': { difficulty: '★★' },
+                'PART2_IV_3': { difficulty: '★★' },
+                'PART2_IV_4': { difficulty: '★★' },
+                'PART2_IV_5': { difficulty: '★★' },
+                'PART2_IV_6': { difficulty: '★★' },
+                'PART2_IV_7': { difficulty: '★★' },
+                'PART2_IV_8': { difficulty: '★★' },
+                'PART2_IV_9': { difficulty: '★★' }
+            },
+            
+            staticConOption: {
+                'PART2_IV_1': { confuse: 'B' },
+                'PART2_IV_2': { confuse: '' },
+                'PART2_IV_3': { confuse: '' },
+                'PART2_IV_4': { confuse: '' },
+                'PART2_IV_5': { confuse: 'B' },
+                'PART2_IV_6': { confuse: '' },
+                'PART2_IV_7': { confuse: '' },
+                'PART2_IV_8': { confuse: '' },
+                'PART2_IV_9': { confuse: '' }
             },
             questionDescriptions: {
                 'PART2_IV_1': '(   ) 1. I _____ like dolls. They are for girls.A.am not	 		<span class="highlightedCon">B.can’t</span> 			   <span class="highlighted">C.don’t</span>',
@@ -205,6 +232,14 @@ export default {
                         const optionPercentages = optionResponse.data.optionPercentages;
                         console.log(optionPercentages);
 
+                        // 获取正确率
+                        const accuracyResponse = await axios.get('http://localhost:3000/api/option-accuracy', {
+                            params: { question, class: this.selectedClass }
+                        });
+                        console.log(accuracyResponse);
+                        const accuracyPercentages = accuracyResponse.data.accuracyRate;
+                        console.log(accuracyPercentages);
+
                         const optionCountsResponse = await axios.get('http://localhost:3000/api/option-counts', {
                             params: { question, class: this.selectedClass }
                         });
@@ -220,7 +255,8 @@ export default {
                             listeningText,
                             optionPercentages,
                             optionCounts,
-                            referenceAnalysis
+                            referenceAnalysis,
+                            accuracyPercentages
                         };
 
                         this.optionCounts = optionCounts;
@@ -234,6 +270,15 @@ export default {
                         const optionPercentages = optionResponse.data.optionPercentages;
                         console.log(optionPercentages);
 
+                        // 获取正确率
+                        const accuracyResponse = await axios.get('http://localhost:3000/api/option-accuracy', {
+                            params: { question, class: this.selectedClass }
+                        });
+                        console.log(accuracyResponse);
+                        const accuracyPercentages = accuracyResponse.data.accuracyRate;
+                        console.log(accuracyPercentages);
+
+
                         const optionCountsResponse = await axios.get('http://localhost:3000/api/option-counts', {
                             params: { question, class: this.selectedClass }
                         });
@@ -249,7 +294,8 @@ export default {
                             listeningText,
                             optionPercentages,
                             optionCounts,
-                            referenceAnalysis
+                            referenceAnalysis,
+                            accuracyPercentages
                         };
 
                         this.optionCounts = optionCounts;
@@ -275,6 +321,18 @@ export default {
             }).join('');
         },
 
+        highlightTextNew(optionText, correctAnswer, confusingAnswer)
+        {
+            if(optionText === correctAnswer)
+            {
+                return `<span class="highlight-correct">${optionText}</span>`;
+            }else if(optionText === confusingAnswer)
+            {
+                return `<span class="highlight-confusing">${optionText}</span>`;
+            }
+            return optionText;
+        },
+
         getClassDisplayName(classCode) {
             const classMap = {
                 '11': '张江一班',
@@ -295,8 +353,12 @@ export default {
 </script>
 
 <style>
-.highlighted {
-    background-color: yellow;
+.highlight-correct {
+    background-color: yellow;   /*高亮正确答案*/
+}
+
+.highlight-confusing {
+    background-color: rgb(148, 211, 92);   /*高亮混淆项答案*/
 }
 
 .highlightedCon {

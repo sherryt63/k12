@@ -10,7 +10,7 @@ app.use(cors());
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: '123456',
+    password: 'qwerasdf12',
     database: 'K12'
 });
 
@@ -1799,4 +1799,89 @@ app.listen(3000, () => {
     console.log('服务器运行在 http://localhost:3000');
 });
 
+//单题获得正确率的接口
+app.get('/api/option-accuracy', async (req, res) => {
+    const question = req.query.question;
+    const selectedClass = req.query.class;
+    const school_no = selectedClass.charAt(0);
+    const class_no = selectedClass.charAt(1);
 
+    console.log("学校编号", school_no);
+    console.log("班级编号", class_no);
+
+    const questionColumn = `${question}_score`;
+    const peerAccuracyQuery = `
+        SELECT
+            SUM(CASE WHEN ${questionColumn} = 1 THEN 1 ELSE 0 END) AS correct_count,
+            COUNT(*) AS total_count
+        FROM gradeHave
+        WHERE school_no = ? AND class_no = ?
+    `;
+
+    db.query(peerAccuracyQuery, [school_no, class_no], (err, results) => {
+        if (err) {
+            console.error('数据库查询失败:', err);
+            return res.status(500).json({ message: '服务器错误' });
+        }
+
+        const { correct_count, total_count } = results[0];
+        console.log("正确人数", correct_count);
+        console.log("总人数", total_count);
+
+        // 计算正确率，防止除以零
+        const accuracyRate = total_count > 0 ? (correct_count / total_count) * 100 : 0;
+        console.log("正确率", accuracyRate.toFixed(2));
+
+        res.json({ accuracyRate: accuracyRate.toFixed(2) });
+    });
+});
+
+///学生个体成绩获取
+app.get('/api/student-total-score', (req, res) => {
+        console.log("进入学生成绩查询");
+        const name = req.query.name;
+        console.log("name", name);
+    
+        if (!name) {
+            return res.status(400).json({ message: 'Name parameter is required' });
+        }
+    
+        // 查询学生的 school_no, class_no 和 stu_no
+        const studentInfoQuery = `SELECT school_no, class_no, stu_no FROM stu_class WHERE user = ?`;
+    
+        db.query(studentInfoQuery, [name], (err, studentInfoResults) => {
+            if (err) {
+                console.error('Database query failed:', err);
+                return res.status(500).json({ message: 'Server error' });
+            }
+    
+            if (studentInfoResults.length === 0) {
+                return res.status(404).json({ message: 'Student not found' });
+            }
+    
+            let { school_no, class_no, stu_no } = studentInfoResults[0];
+            school_no = school_no.trim();
+            class_no = class_no.trim();
+            stu_no = stu_no.trim();
+            console.log(school_no, class_no, stu_no);
+    
+            // 查询学生成绩
+            const studentScoresQuery = `SELECT score FROM gradeHave WHERE school_no = ? AND class_no = ? AND stu_no = ?`;
+    
+            console.log('Executing query:', studentScoresQuery, 'with params:', [school_no, class_no, stu_no]);
+            db.query(studentScoresQuery, [school_no, class_no, stu_no], (err, studentScoresResults) => {
+                if (err) {
+                    console.error('Database query failed:', err);
+                    return res.status(500).json({ message: 'Server error' });
+                }
+    
+                if (studentScoresResults.length === 0) {
+                    return res.status(404).json({ message: 'Student scores not found' });
+                }
+    
+                const studentScores = studentScoresResults[0];
+                console.log(studentScores);
+                res.json({ scores: studentScores });
+            });
+        });
+    });

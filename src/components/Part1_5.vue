@@ -1,10 +1,7 @@
 <template>
     <div>
+      <header class="header">
         <h2>Ⅴ. Listen and write（听一听，写出听到的单词完成短文，每线一词）：【词汇-词音，词汇-词形】{{ staticData[question]?.difficulty }}</h2>
-
-        <div class="images">
-          <img src="images/PART1_5.png" />
-        </div>
         
         <div v-if="permission === '2'" class="class-select">
             <label for="class-select">选择班级：</label>
@@ -24,68 +21,84 @@
                 <option v-for="cls in classOptions" :key="cls" :value="cls">{{ getClassDisplayName(cls) }}</option>
             </select>
         </div>
-
-
-        <div v-for="(question, index) in questions" :key="index">
-
-            <div class="text">
-                <p>【听力原文】：</p>
-                <p>{{ questionData[question]?.listeningText }}</p>
-            </div>
-
-            <div class="question-container">
-                <p
-                    :class="{ highlighted: permission === '1' && questionData[question]?.studentAnswer !== questionData[question]?.correctAnswer }">
-                    【题目】： {{ index + 1 }}
-                </p>
-            </div>
-
-            <div v-if="questionDescriptions[question]">
-                <p>【题目描述】：{{ questionDescriptions[question] }}</p>
-            </div>
-
-            <p>【难度】：{{ staticData[question]?.difficulty }}</p>
-
-            <!-- 根据 permission 显示不同内容 -->
-            <div v-if="permission === '1'" class="peer-accuracy-container">
-                <p> 【同伴正确率】：{{ questionData[question]?.peerAccuracy }}%</p>
-                <p> 【学生答案】：{{ questionData[question]?.studentAnswer }}</p>
-            </div>
-
-
-            <div v-if="permission === '0' || permission === '2'" class="option-percentages-container">
-                <p>【正确人数比】</p>
-                <div>
-                    <!-- 直接显示 optionPercentages 的值 -->
-                    <p>{{ questionData[question]?.optionPercentages || '0' }}</p>
-                </div>
-            </div>
-
-            <!-- 显示图片和难度 -->
-                <div>
-                    <!-- 显示选项 -->
-                    <div v-if="permission === '0' || permission === '2'">
-                        <p>【所选班级学生答案情况】</p>
-                        <div v-for="(count, option) in questionData[question]?.optionCounts" :key="option">
-                            <p>{{ option }}: {{ count }} 人</p>
-                        </div>
-                    </div>
-                </div>
-
-            <!-- 正确答案 -->
-            <div class="corrent_answer">
-                <p>【正确答案】</p>
-                <p v-html="highlightText(questionData[question]?.correctAnswer, questionData[question]?.correctAnswer)"></p>
-            </div>
-
-            <!-- 参考解析 -->
-            <div>
-                <h3>参考解析</h3>
-                <p>{{ questionData[question]?.referenceAnalysis }}</p>
-            </div>
-
-            <hr>
+      </header>
+      <div class="images">
+          <img src="images/PART1_5.png" />
         </div>
+        
+    <div v-for="(question, index) in questions" :key="index">
+     <div class="part-background">
+      
+      <!-- 显示图片和难度 -->
+      <div class="question-wrapper">  
+        <div class="left-column"> 
+          <!--题号+难度-->
+          <div class="title">
+            <p :class="{highlighted: permission === '1' && questionData[question]?.studentAnswer !== questionData[question]?.correctAnswer }">
+              {{ index + 1 }}、 {{ staticData[question]?.difficulty }}</p>
+          </div>
+          
+          <div v-if="questionDescriptions[question]">
+                <p style="font-size:18px">题目描述：{{ questionDescriptions[question] }}</p>
+            </div>
+          <!-- 正确答案 -->
+          <div class="corrent_answer">
+            <p style="font-size:18px">正确答案：<span v-html="highlightText(questionData[question]?.correctAnswer, questionData[question]?.correctAnswer)"></span></p>
+          </div>
+
+          <!-- 参考解析 -->
+          <div>
+            <p style="font-size:18px">参考解析：{{ questionData[question]?.referenceAnalysis }}</p>
+          </div>
+        </div>
+        <div class="right-column table-container"> 
+
+          <!--教师端、管理员端-->
+          <div v-if="permission === '0' || permission === '2'">
+          <table class="custom-border" border="1" cellspacing="0" width=500px height=160px bgcolor=white>
+            <tbody>
+            <tr>
+              <td style="width: 25%; text-align: center; color: black; font-size:16px">选项</td>
+              <td style="width: 25%; text-align: center; color: black; font-size:16px" v-for="(count, option) in questionData[question]?.optionCounts" :key="option">
+                {{ option }}
+              </td>
+            </tr>
+            <tr>
+              <td style="height: 33.333%; text-align: center; color: black; font-size:16px">选择人数</td>
+              <td style="height: 33.333%; text-align: center; color: black; font-size:16px" v-for="(count, option) in questionData[question]?.optionCounts" :key="option">
+                 {{ count }} 人
+              </td>
+            </tr>
+            <tr>
+              <td colspan=5 style="color: black; font-size:16px"><span class="option-percentages-container">&nbsp;&nbsp;&nbsp;&nbsp;正确人数比：{{ questionData[question]?.optionPercentages || '0' }}</span></td>
+            </tr>
+            </tbody>
+          </table>
+          </div>
+
+          <!--学生端-->
+          <div v-if="permission === '1'">
+            <table class="custom-border" border="1" cellspacing="0" width=500px height=160px bgcolor=white>
+            <tbody>
+            <tr>
+              <td style="height: 50%; width: 25%; text-align: center; color: black; font-size:16px">选项</td>
+              <td style="width: 25%; text-align: center; color: black; font-size:16px" v-for="(option, optIndex) in options" :key="optIndex">
+                <span v-html="highlightText(option.text, questionData[question]?.correctAnswer)"></span>
+              </td>
+            </tr>
+            <tr>
+              <td colspan=5 style="color: black; font-size:16px"><p class="option-percentages-container">&nbsp;&nbsp;&nbsp;&nbsp;学生答案：{{ questionData[question]?.studentAnswer }}</p>
+              <p class="option-percentages-container">&nbsp;&nbsp;&nbsp;&nbsp;同伴正确率：{{ questionData[question]?.peerAccuracy }}%</p></td>
+            </tr>
+            </tbody>
+          </table>
+          </div>
+        </div>
+      </div>
+     </div>
+     </div>
+
+        
     </div>
 </template>
 
@@ -116,10 +129,10 @@ export default {
             optionCounts: {},
             optionPercentages: {},
             staticData: {
-                'PART1_V_1': { difficulty: '两颗星' },
-                'PART1_V_2': { difficulty: '两颗星' },
-                'PART1_V_3': { difficulty: '两颗星' },
-                'PART1_V_4': { difficulty: '两颗星' }
+                'PART1_V_1': { difficulty: '★★' },
+                'PART1_V_2': { difficulty: '★★' },
+                'PART1_V_3': { difficulty: '★★' },
+                'PART1_V_4': { difficulty: '★★' }
             },
             questionDescriptions: {
                 'PART1_V_1': 'Today is the ________ of June. ',

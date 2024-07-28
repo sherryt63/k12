@@ -1,0 +1,50 @@
+.header {
+  display: flex;
+  flex-direction: column; /* 垂直排列 */
+  align-items: center; /* 水平居中对齐 */
+  width: 100%;
+  margin-top: 0;
+  margin-bottom: 30px; /* 底部空间与其他内容分开 */
+  background-color: #6DE4C6; /* 背景颜色 */
+  padding: 10px; /* 内边距 */
+  border-radius: 8px; /* 圆角 */
+}
+  
+  .header h2 {
+    margin: 0;
+    font-weight: bold;
+    color: #CDFDE7; /* 字体颜色 */
+    font-size: 24px; /* 字体大小 */
+    flex: 1; /* 占用剩余空间 */
+  }
+  
+  .header .class-select {
+    margin: 0; /* 去掉 margin */
+    display: flex;
+    align-items: center; /* 垂直居中对齐 */
+    font-weight: bold;
+    font-size: 20px;
+  }
+  .header .class-select select {
+    font-size: 16px; /* 字体大小 */
+    padding: 8px; /* 内边距 */
+    color: #ffffff; /* 字体颜色，黑色 */
+    background-color: #6DE4C6; /* 背景颜色，白色 */
+    border: 1px solid #aaa; /* 边框颜色，灰色 */
+    border-radius: 4px; /* 圆角边框 */
+    font-weight: bold; /* 加粗字体 */
+  }
+  .header .class-select label {
+    margin-right: 10px; /* 标签和下拉框之间的间距 */
+    color: #CDFDE7;
+  }
+  
+  .header select {
+    font-size: 16px; /* 下拉框字体大小 */
+    padding: 8px; /* 下拉框内边距 */
+    color: #333; /* 字体颜色 */
+    background-color: #ffffff; /* 背景颜色 */
+    border: 1px solid #ddd; /* 边框颜色 */
+    border-radius: 4px; /* 圆角边框 */
+    font-weight: bold;
+  }

@@ -1,5 +1,6 @@
 <template>
     <div>
+      <header class="header">
         <h2>Ⅵ. Read and choose（读一读，选择合适的应答句，将字母代号写在前面的括号内）：【语法-句法】</h2>
 
         <div v-if="permission === '2'" class="class-select">
@@ -20,64 +21,77 @@
                     <option v-for="cls in classOptions" :key="cls" :value="cls">{{ getClassDisplayName(cls) }}</option>
                 </select>
             </div>
-
-        <div v-for="(question, index) in questions" :key="index">
-
-
-            <div class="question-container">
-                <p
-                    :class="{ highlighted: permission === '1' && questionData[question]?.studentAnswer !== questionData[question]?.correctAnswer }">
-                    【题目】： {{ index + 1 }}
-                </p>
+      </header>
+       <div v-for="(question, index) in questions" :key="index">
+     <div class="part-background">
+      
+      <!-- 显示图片和难度 -->
+      <div class="question-wrapper">  
+        <div class="left-column"> 
+          <!--题号+难度-->
+          <div class="title">
+            <p :class="{highlighted: permission === '1' && questionData[question]?.studentAnswer !== questionData[question]?.correctAnswer }">
+              {{ index + 1 }}、 {{ staticData[question]?.difficulty }}</p>
+          </div>
+          <div v-if="questionDescriptions[question]">
+                <p style="font-size:18px">题目描述：{{ questionDescriptions[question] }}</p>
             </div>
+          <!-- 正确答案 -->
+          <div class="corrent_answer">
+            <p style="font-size:18px">正确答案：<span v-html="highlightText(questionData[question]?.correctAnswer, questionData[question]?.correctAnswer)"></span></p>
+          </div>
 
-            <div v-if="questionDescriptions[question]">
-                <p>【题目描述】：{{ questionDescriptions[question] }}</p>
-            </div>
-
-            <!-- 显示图片和难度 -->
-            <div>
-                <!-- 显示选项 -->
-                <div v-for="(option, optIndex) in options" :key="optIndex">
-                    <p v-html="highlightText(option.text, questionData[question]?.correctAnswer)"></p>
-                    <!-- 显示选项人数，只有 permission === '0' 或 permission === '2' 时显示 -->
-                    <p v-if="permission === '0' || permission === '2'">选择人数：{{
-                        questionData[question]?.optionCounts[option.value] || 0 }}</p>
-                </div>
-                <p>【难度】：{{ staticData[question]?.difficulty }}</p>
-            </div>
-
-
-
-            <!-- 根据 permission 显示不同内容 -->
-            <div v-if="permission === '1'" class="peer-accuracy-container">
-                <p> 【同伴正确率】：{{ questionData[question]?.peerAccuracy }}%</p>
-                <p> 【学生答案】：{{ questionData[question]?.studentAnswer }}</p>
-            </div>
-
-
-            <div v-if="permission === '0' || permission === '2'" class="option-percentages-container">
-                <p>【正确人数比】</p>
-                <div>
-                    <!-- 直接显示 optionPercentages 的值 -->
-                    <p>{{ questionData[question]?.optionPercentages || '0' }}</p>
-                </div>
-            </div>
-
-            <!-- 正确答案 -->
-            <div class="corrent_answer">
-                <p>【正确答案】</p>
-                <p v-html="highlightText(questionData[question]?.correctAnswer, questionData[question]?.correctAnswer)"></p>
-            </div>
-
-            <!-- 参考解析 -->
-            <div>
-                <h3>参考解析</h3>
-                <p>{{ questionData[question]?.referenceAnalysis }}</p>
-            </div>
-
-            <hr>
+          <!-- 参考解析 -->
+          <div>
+            <p style="font-size:18px">参考解析：{{ questionData[question]?.referenceAnalysis }}</p>
+          </div>
         </div>
+        <div class="right-column table-container"> 
+
+          <!--教师端、管理员端-->
+          <div v-if="permission === '0' || permission === '2'">
+          <table class="custom-border" border="1" cellspacing="0" width=500px height=160px bgcolor=white>
+            <tbody>
+            <tr>
+              <td style="width: 16.67%; text-align: center; color: black; font-size:16px">选项</td>
+              <td style="width: 16.67%; text-align: center; color: black; font-size:16px" v-for="(option, optIndex) in options" :key="optIndex">
+                <span v-html="highlightText(option.text, questionData[question]?.correctAnswer)"></span>
+              </td>
+            </tr>
+            <tr>
+              <td style="height: 33.333%; text-align: center; color: black; font-size:16px">选择人数</td>
+              <td style="height: 33.333%; text-align: center; color: black; font-size:16px" v-for="(option, optIndex) in options" :key="optIndex">
+                 {{ questionData[question]?.optionCounts[option.value] || 0 }}
+              </td>
+            </tr>
+            <tr>
+              <td colspan=6 style="color: black; font-size:16px"><span class="option-percentages-container">&nbsp;&nbsp;&nbsp;&nbsp;正确人数比：{{ questionData[question]?.optionPercentages || '0' }}</span></td>
+            </tr>
+            </tbody>
+          </table>
+          </div>
+
+          <!--学生端-->
+          <div v-if="permission === '1'">
+            <table class="custom-border" border="1" cellspacing="0" width=500px height=160px bgcolor=white>
+            <tbody>
+            <tr>
+              <td style="height: 50%; width: 16.67%; text-align: center; color: black; font-size:16px">选项</td>
+              <td style="width: 16.67%; text-align: center; color: black; font-size:16px" v-for="(option, optIndex) in options" :key="optIndex">
+                <span v-html="highlightText(option.text, questionData[question]?.correctAnswer)"></span>
+              </td>
+            </tr>
+            <tr>
+              <td colspan=6 style="color: black; font-size:16px"><p class="option-percentages-container">&nbsp;&nbsp;&nbsp;&nbsp;学生答案：{{ questionData[question]?.studentAnswer }}</p>
+              <p class="option-percentages-container">&nbsp;&nbsp;&nbsp;&nbsp;同伴正确率：{{ questionData[question]?.peerAccuracy }}%</p></td>
+            </tr>
+            </tbody>
+          </table>
+          </div>
+        </div>
+      </div>
+     </div>
+     </div> 
     </div>
 </template>
 
@@ -85,6 +99,7 @@
 
 <script>
 import axios from 'axios';
+import "./Part.css";
 
 export default {
     data() {
@@ -110,11 +125,11 @@ export default {
             optionCounts: {},
             optionPercentages: {},
             staticData: {
-                'PART2_VI_1': { difficulty: '两颗星' },
-                'PART2_VI_2': { difficulty: '两颗星' },
-                'PART2_VI_3': { difficulty: '两颗星' },
-                'PART2_VI_4': { difficulty: '两颗星' },
-                'PART2_VI_5': { difficulty: '两颗星' }
+                'PART2_VI_1': { difficulty: '★★' },
+                'PART2_VI_2': { difficulty: '★★' },
+                'PART2_VI_3': { difficulty: '★★' },
+                'PART2_VI_4': { difficulty: '★★' },
+                'PART2_VI_5': { difficulty: '★★' }
             },
             questionDescriptions: {
                 'PART2_VI_1': '(   ) 1. Can you fly a kite?         			A. We fly a kite.',
@@ -288,6 +303,113 @@ export default {
 </script>
 
 <style>
+.highlighted {
+    background-color: yellow;
+}
+
+.highlight {
+    color: red;
+}
+
+.class-select {
+    margin-bottom: 20px;
+}
+
+/* 题目页的页面背景颜色 */
+body {  
+  background-color: #f5f7fa;   
+} 
+
+/*题目整体*/
+.question-wrapper {  
+  display: flex; /* 启用Flexbox布局 */  
+  justify-content: space-between; /* 左右两边内容间隔 */  
+}  
+
+/*题目左部分、右部分*/ 
+.left-column{  
+  flex: 1; /* 使得左右两边都能根据内容自适应宽度，同时保持一定的空间 */  
+  padding: 10px; /* 可选，为两边内容添加一些内边距 */  
+  margin-left: 100px;
+}
+
+.right-column{
+  flex: 1; /* 使得左右两边都能根据内容自适应宽度，同时保持一定的空间 */  
+  padding: 10px; /* 可选，为两边内容添加一些内边距 */ 
+  margin-right: 100px; 
+}
+
+/*表格整体*/
+.table-container {  
+  display: flex;  
+  justify-content: center; /* 水平居中 */  
+  align-items: center; /* 垂直居中（如果父容器高度足够的话） */  
+}  
+
+/*表格边框*/
+.custom-border {  
+  border-collapse: collapse; /* 确保相邻单元格的边框合并为一个单一的边框 */  
+}  
+  
+.custom-border,  
+.custom-border td,  
+.custom-border th {  
+  border: 1.2px solid black; /* 设置边框宽度、样式和颜色 */  
+} 
+
+.highlighted {
+  background-color: yellow;
+}
+
+.highlight {
+  color: red;
+}
+
+.class-select {
+  margin-bottom: 20px;
+}
+
+.question-group {  
+  display: flex;  
+  justify-content: space-between; /* 根据需要调整间距 */  
+  flex-wrap: wrap; /* 如果需要换行显示 */  
+}  
+  
+.question-item {  
+  /* 每个问题的样式 */  
+  flex: 1; /* 使得每个问题尽可能等宽，但也可以根据需要调整 */  
+  margin-right: 20px; /* 右边距，根据需要调整 */  
+  /* 其他样式... */  
+}  
+  
+/* 移除最后一个问题项的右边距（如果每行恰好三个问题） */  
+.question-group .question-item:nth-child(3n) {  
+  margin-right: 0;  
+}
+
+/*题目页里题目标题的格式*/
+.title{
+  font-weight: bold; /*字体加粗*/
+  font-size: 24px;   /*字体大小*/
+  color: #6DE4C6;    /*字体颜色*/
+}
+
+/*题目页里题目图片的格式*/
+.image{
+  width: 400px;
+  height: 200px;
+}
+
+/*题目页里整个题目的背景格式*/
+.part-background {  
+  background-color: white; /* 背景颜色 */  
+  padding: 10px; /* 可以根据需要添加内边距 */  
+  border-radius: 20px; /* 可以添加圆角边框，使其看起来更柔和 */  
+  margin-bottom: 50px;
+  margin-left: 50px;
+  margin-right: 50px;
+}
+
 .highlighted {
     background-color: yellow;
 }

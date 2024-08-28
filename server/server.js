@@ -9,9 +9,9 @@ app.use(cors());
 
 const db = mysql.createConnection({
     host: 'localhost',
-    user: 'root',
+    user: 'sherry',
     password: 'qwerasdf12',
-    database: 'K12'
+    database: 'k12',
 });
 
 db.connect(err => {
@@ -464,7 +464,7 @@ app.get('/api/admin-score-summary-campusCom', (req, res) => {
                 FROM gradeHave
                 WHERE school_no = ?
                 ORDER BY score
-                LIMIT 1
+                    LIMIT 1
                 OFFSET ?
             `;
 
@@ -482,7 +482,7 @@ app.get('/api/admin-score-summary-campusCom', (req, res) => {
                     FROM gradeHave
                     WHERE school_no = ?
                     ORDER BY score
-                    LIMIT 1
+                        LIMIT 1
                     OFFSET ?
                 `;
 
@@ -500,7 +500,7 @@ app.get('/api/admin-score-summary-campusCom', (req, res) => {
                         FROM gradeHave
                         WHERE school_no = ?
                         ORDER BY score
-                        LIMIT 1
+                            LIMIT 1
                         OFFSET ?
                     `;
 
@@ -563,7 +563,7 @@ app.get('/api/student-scores', (req, res) => {
                 AVG(PART2_II_1_score) AS PART2_II_1_score, AVG(PART2_II_2_score) AS PART2_II_2_score, AVG(PART2_II_3_score) AS PART2_II_3_score, AVG(PART2_II_4_score) AS PART2_II_4_score, AVG(PART2_II_5_score) AS PART2_II_5_score,
                 AVG(PART2_III_1_score) AS PART2_III_1_score, AVG(PART2_III_2_score) AS PART2_III_2_score, AVG(PART2_III_3_score) AS PART2_III_3_score, AVG(PART2_III_4_score) AS PART2_III_4_score,
                 AVG(PART2_IV_1_score) AS PART2_IV_1_score, AVG(PART2_IV_2_score) AS PART2_IV_2_score, AVG(PART2_IV_3_score) AS PART2_IV_3_score, AVG(PART2_IV_4_score) AS PART2_IV_4_score, AVG(PART2_IV_5_score) AS PART2_IV_5_score, AVG(PART2_IV_6_score) AS PART2_IV_6_score, AVG(PART2_IV_7_score) AS PART2_IV_7_score, AVG(PART2_IV_8_score) AS PART2_IV_8_score, AVG(PART2_IV_9_score) AS PART2_IV_9_score,
-                AVG(PART2_V_1_1_score) AS PART2_V_1_1_score, AVG(PART2_V_1_2_score) AS PART2_V_1_2_score, AVG(PART2_V_2_1_score) AS PART2_V_2_1_score, AVG(PART2_V_2_2_score) AS PART2_V_2_2_score, AVG(PART2_V_3_1_score) AS PART2_V_3_1_score, AVG(PART2_V_3_2_score) AS PART2_V_3_2_score, AVG(PART2_V_4_1_score) AS PART2_V_4_1_score, AVG(PART2_V_4_2_score) AS PART2_V_4_2_score, AVG(PART2_V_5_1_score) AS PART2_V_5_1_score, AVG(PART2_V_5_2_score) AS PART2_V_5_2_score,
+                AVG(PART2_V_1_score) AS PART2_V_1_score, AVG(PART2_V_2_score) AS PART2_V_2_score, AVG(PART2_V_3_score) AS PART2_V_3_score, AVG(PART2_V_4_score) AS PART2_V_4_score, AVG(PART2_V_5_score) AS PART2_V_5_score, 
                 AVG(PART2_VI_1_score) AS PART2_VI_1_score, AVG(PART2_VI_2_score) AS PART2_VI_2_score, AVG(PART2_VI_3_score) AS PART2_VI_3_score, AVG(PART2_VI_4_score) AS PART2_VI_4_score, AVG(PART2_VI_5_score) AS PART2_VI_5_score,
                 AVG(PART2_VII_1_score) AS PART2_VII_1_score, AVG(PART2_VII_2_score) AS PART2_VII_2_score, AVG(PART2_VII_3_score) AS PART2_VII_3_score, AVG(PART2_VII_4_score) AS PART2_VII_4_score, AVG(PART2_VII_5_score) AS PART2_VII_5_score,
                 AVG(PART2_VIII_1_score) AS PART2_VIII_1_score, AVG(PART2_VIII_2_score) AS PART2_VIII_2_score, AVG(PART2_VIII_3_score) AS PART2_VIII_3_score, AVG(PART2_VIII_4_score) AS PART2_VIII_4_score
@@ -595,7 +595,7 @@ app.get('/api/student-scores', (req, res) => {
                 PART2_II_total: (averages.PART2_II_1_score || 0) + (averages.PART2_II_2_score || 0) + (averages.PART2_II_3_score || 0) + (averages.PART2_II_4_score || 0) + (averages.PART2_II_5_score || 0),
                 PART2_III_total: (averages.PART2_III_1_score || 0) + (averages.PART2_III_2_score || 0) + (averages.PART2_III_3_score || 0) + (averages.PART2_III_4_score || 0),
                 PART2_IV_total: (averages.PART2_IV_1_score || 0) + (averages.PART2_IV_2_score || 0) + (averages.PART2_IV_3_score || 0) + (averages.PART2_IV_4_score || 0) + (averages.PART2_IV_5_score || 0) + (averages.PART2_IV_6_score || 0) + (averages.PART2_IV_7_score || 0) + (averages.PART2_IV_8_score || 0) + (averages.PART2_IV_9_score || 0),
-                PART2_V_total: (averages.PART2_V_1_1_score || 0) + (averages.PART2_V_1_2_score || 0) + (averages.PART2_V_2_1_score || 0) + (averages.PART2_V_2_2_score || 0) + (averages.PART2_V_3_1_score || 0) + (averages.PART2_V_3_2_score || 0) + (averages.PART2_V_4_1_score || 0) + (averages.PART2_V_4_2_score || 0) + (averages.PART2_V_5_1_score || 0) + (averages.PART2_V_5_2_score || 0),
+                PART2_V_total: (averages.PART2_V_1_score || 0) +  (averages.PART2_V_2_score || 0) + (averages.PART2_V_3_score || 0) + (averages.PART2_V_4_score || 0)  + (averages.PART2_V_5_score || 0) ,
                 PART2_VI_total: (averages.PART2_VI_1_score || 0) + (averages.PART2_VI_2_score || 0) + (averages.PART2_VI_3_score || 0) + (averages.PART2_VI_4_score || 0) + (averages.PART2_VI_5_score || 0),
                 PART2_VII_total: (averages.PART2_VII_1_score || 0) + (averages.PART2_VII_2_score || 0) + (averages.PART2_VII_3_score || 0) + (averages.PART2_VII_4_score || 0) + (averages.PART2_VII_5_score || 0),
                 PART2_VIII_total: (averages.PART2_VIII_1_score || 0) + (averages.PART2_VIII_2_score || 0) + (averages.PART2_VIII_3_score || 0) + (averages.PART2_VIII_4_score || 0)
@@ -647,6 +647,72 @@ app.get('/api/student-scores', (req, res) => {
     });
 });
 
+app.get('/api/one-student-scores', (req, res) => {
+    const username = req.query.name;
+    console.log('查询单个学生成绩', username);
+    if (!username) {
+        return res.status(400).json({ error: 'Name is required' });
+    }
+
+    // 查询 stu_class 表，获取 school_no, class_no 和 stu_no
+    const queryStuClass = 'SELECT school_no, class_no, stu_no FROM stu_class WHERE user = ?';
+    console.log("查询个人每题成绩的语句为", queryStuClass);
+    db.query(queryStuClass, [username], (err, results) => {
+        if (err) {
+            console.error('查询 stu_class 表时发生错误', err);
+            res.status(500).send('查询学生信息时出错');
+            return;
+        }
+
+        if (results.length === 0) {
+            res.status(404).send('未找到该学生的信息');
+            return;
+        }
+
+        let { school_no, class_no, stu_no } = results[0];
+        school_no = school_no.trim();
+        class_no = class_no.trim();
+        stu_no = stu_no.trim();
+        console.log("找到该学生的校区班级为", school_no, class_no, stu_no);
+
+        // 使用查询到的 school_no, class_no 和 stu_no 查询学生成绩
+        const queryGrade = `
+      SELECT PART1_I_1_score, PART1_I_2_score, PART1_I_3_score, PART1_I_4_score, PART1_I_5_score, PART1_I_6_score,
+             PART1_II_1_score, PART1_II_2_score, PART1_II_3_score, PART1_II_4_score, PART1_II_5_score, PART1_II_6_score,
+             PART1_III_1_score, PART1_III_2_score, PART1_III_3_score, PART1_III_4_score, PART1_III_5_score,
+             PART1_IV_1_score, PART1_IV_2_score, PART1_IV_3_score, PART1_IV_4_score, PART1_IV_5_score,
+             PART1_V_1_score, PART1_V_2_score, PART1_V_3_score, PART1_V_4_score,
+             PART1_VI_1_score, PART1_VI_2_score, PART1_VI_3_score, PART1_VI_4_score, PART1_VI_5_score,
+             PART1_VII_1_score, PART1_VII_2_score, PART1_VII_3_score, PART1_VII_4_score, PART1_VII_5_score,
+             PART1_VIII_1_score, PART1_VIII_2_score, PART1_VIII_3_score, PART1_VIII_4_score,
+             PART2_I_score,
+             PART2_II_1_score, PART2_II_2_score, PART2_II_3_score, PART2_II_4_score, PART2_II_5_score,
+             PART2_III_1_score, PART2_III_2_score, PART2_III_3_score, PART2_III_4_score,
+             PART2_IV_1_score, PART2_IV_2_score, PART2_IV_3_score, PART2_IV_4_score, PART2_IV_5_score, PART2_IV_6_score, PART2_IV_7_score, PART2_IV_8_score, PART2_IV_9_score,
+             PART2_V_1_score, PART2_V_2_score, PART2_V_3_score, PART2_V_4_score, PART2_V_5_score,
+             PART2_VI_1_score, PART2_VI_2_score, PART2_VI_3_score, PART2_VI_4_score, PART2_VI_5_score,
+             PART2_VII_1_score, PART2_VII_2_score, PART2_VII_3_score, PART2_VII_4_score, PART2_VII_5_score,
+             PART2_VIII_1_score, PART2_VIII_2_score, PART2_VIII_3_score, PART2_VIII_4_score
+      FROM gradeHave
+      WHERE school_no = ? AND class_no = ? AND stu_no = ?
+    `;
+        db.query(queryGrade, [school_no, class_no, stu_no], (err, results) => {
+
+            console.log('Executing query:', queryGrade);
+            console.log('With params', school_no, class_no, stu_no);
+            if (err) {
+                console.error('查询 gradeHave表时发生错误', err);
+                res.status(500).send('查询学生成绩时出错');
+                return;
+            }
+            console.log(results);
+
+            res.json(results[0]);
+        });
+    });
+});
+
+
 ///获取管理员/老师的各题分析
 app.get('/api/admin-scores', (req, res) => {
     const username = req.query.name;
@@ -681,7 +747,7 @@ app.get('/api/admin-scores', (req, res) => {
             AVG(PART2_II_1_score) AS PART2_II_1_score, AVG(PART2_II_2_score) AS PART2_II_2_score, AVG(PART2_II_3_score) AS PART2_II_3_score, AVG(PART2_II_4_score) AS PART2_II_4_score, AVG(PART2_II_5_score) AS PART2_II_5_score,
             AVG(PART2_III_1_score) AS PART2_III_1_score, AVG(PART2_III_2_score) AS PART2_III_2_score, AVG(PART2_III_3_score) AS PART2_III_3_score, AVG(PART2_III_4_score) AS PART2_III_4_score,
             AVG(PART2_IV_1_score) AS PART2_IV_1_score, AVG(PART2_IV_2_score) AS PART2_IV_2_score, AVG(PART2_IV_3_score) AS PART2_IV_3_score, AVG(PART2_IV_4_score) AS PART2_IV_4_score, AVG(PART2_IV_5_score) AS PART2_IV_5_score, AVG(PART2_IV_6_score) AS PART2_IV_6_score, AVG(PART2_IV_7_score) AS PART2_IV_7_score, AVG(PART2_IV_8_score) AS PART2_IV_8_score, AVG(PART2_IV_9_score) AS PART2_IV_9_score,
-            AVG(PART2_V_1_1_score) AS PART2_V_1_1_score, AVG(PART2_V_1_2_score) AS PART2_V_1_2_score, AVG(PART2_V_2_1_score) AS PART2_V_2_1_score, AVG(PART2_V_2_2_score) AS PART2_V_2_2_score, AVG(PART2_V_3_1_score) AS PART2_V_3_1_score, AVG(PART2_V_3_2_score) AS PART2_V_3_2_score, AVG(PART2_V_4_1_score) AS PART2_V_4_1_score, AVG(PART2_V_4_2_score) AS PART2_V_4_2_score, AVG(PART2_V_5_1_score) AS PART2_V_5_1_score, AVG(PART2_V_5_2_score) AS PART2_V_5_2_score,
+            AVG(PART2_V_1_score) AS PART2_V_1_score, AVG(PART2_V_2_score) AS PART2_V_2_score, AVG(PART2_V_3_score) AS PART2_V_3_score, AVG(PART2_V_4_score) AS PART2_V_4_score, AVG(PART2_V_5_score) AS PART2_V_5_score, 
             AVG(PART2_VI_1_score) AS PART2_VI_1_score, AVG(PART2_VI_2_score) AS PART2_VI_2_score, AVG(PART2_VI_3_score) AS PART2_VI_3_score, AVG(PART2_VI_4_score) AS PART2_VI_4_score, AVG(PART2_VI_5_score) AS PART2_VI_5_score,
             AVG(PART2_VII_1_score) AS PART2_VII_1_score, AVG(PART2_VII_2_score) AS PART2_VII_2_score, AVG(PART2_VII_3_score) AS PART2_VII_3_score, AVG(PART2_VII_4_score) AS PART2_VII_4_score, AVG(PART2_VII_5_score) AS PART2_VII_5_score,
             AVG(PART2_VIII_1_score) AS PART2_VIII_1_score, AVG(PART2_VIII_2_score) AS PART2_VIII_2_score, AVG(PART2_VIII_3_score) AS PART2_VIII_3_score, AVG(PART2_VIII_4_score) AS PART2_VIII_4_score
@@ -710,16 +776,17 @@ app.get('/api/admin-scores', (req, res) => {
             PART1_VI_total: (averages.PART1_VI_1_score || 0) + (averages.PART1_VI_2_score || 0) + (averages.PART1_VI_3_score || 0) + (averages.PART1_VI_4_score || 0) + (averages.PART1_VI_5_score || 0),
             PART1_VII_total: (averages.PART1_VII_1_score || 0) + (averages.PART1_VII_2_score || 0) + (averages.PART1_VII_3_score || 0) + (averages.PART1_VII_4_score || 0) + (averages.PART1_VII_5_score || 0),
             PART1_VIII_total: (averages.PART1_VIII_1_score || 0) + (averages.PART1_VIII_2_score || 0) + (averages.PART1_VIII_3_score || 0) + (averages.PART1_VIII_4_score || 0),
-            PART2_I_total: (averages.PART2_I_score || 0),
+            PART2_I_total: averages.PART2_I_score || 0,
             PART2_II_total: (averages.PART2_II_1_score || 0) + (averages.PART2_II_2_score || 0) + (averages.PART2_II_3_score || 0) + (averages.PART2_II_4_score || 0) + (averages.PART2_II_5_score || 0),
             PART2_III_total: (averages.PART2_III_1_score || 0) + (averages.PART2_III_2_score || 0) + (averages.PART2_III_3_score || 0) + (averages.PART2_III_4_score || 0),
             PART2_IV_total: (averages.PART2_IV_1_score || 0) + (averages.PART2_IV_2_score || 0) + (averages.PART2_IV_3_score || 0) + (averages.PART2_IV_4_score || 0) + (averages.PART2_IV_5_score || 0) + (averages.PART2_IV_6_score || 0) + (averages.PART2_IV_7_score || 0) + (averages.PART2_IV_8_score || 0) + (averages.PART2_IV_9_score || 0),
-            PART2_V_total: (averages.PART2_V_1_1_score || 0) + (averages.PART2_V_1_2_score || 0) + (averages.PART2_V_2_1_score || 0) + (averages.PART2_V_2_2_score || 0) + (averages.PART2_V_3_1_score || 0) + (averages.PART2_V_3_2_score || 0) + (averages.PART2_V_4_1_score || 0) + (averages.PART2_V_4_2_score || 0) + (averages.PART2_V_5_1_score || 0) + (averages.PART2_V_5_2_score || 0),
+            PART2_V_total: (averages.PART2_V_1_score || 0) +  (averages.PART2_V_2_score || 0) + (averages.PART2_V_3_score || 0) + (averages.PART2_V_4_score || 0)  + (averages.PART2_V_5_score || 0) ,
             PART2_VI_total: (averages.PART2_VI_1_score || 0) + (averages.PART2_VI_2_score || 0) + (averages.PART2_VI_3_score || 0) + (averages.PART2_VI_4_score || 0) + (averages.PART2_VI_5_score || 0),
             PART2_VII_total: (averages.PART2_VII_1_score || 0) + (averages.PART2_VII_2_score || 0) + (averages.PART2_VII_3_score || 0) + (averages.PART2_VII_4_score || 0) + (averages.PART2_VII_5_score || 0),
             PART2_VIII_total: (averages.PART2_VIII_1_score || 0) + (averages.PART2_VIII_2_score || 0) + (averages.PART2_VIII_3_score || 0) + (averages.PART2_VIII_4_score || 0)
         };
 
+        // 计算每个大题的题数
         const questionCounts = {
             PART1_I: 6,
             PART1_II: 6,
@@ -733,7 +800,7 @@ app.get('/api/admin-scores', (req, res) => {
             PART2_II: 5,
             PART2_III: 4,
             PART2_IV: 9,
-            PART2_V: 10,
+            PART2_V: 5,
             PART2_VI: 5,
             PART2_VII: 5,
             PART2_VIII: 4
@@ -802,7 +869,7 @@ app.get('/api/admin-scores-campusCom', (req, res) => {
             AVG(PART2_II_1_score) AS PART2_II_1_score, AVG(PART2_II_2_score) AS PART2_II_2_score, AVG(PART2_II_3_score) AS PART2_II_3_score, AVG(PART2_II_4_score) AS PART2_II_4_score, AVG(PART2_II_5_score) AS PART2_II_5_score,
             AVG(PART2_III_1_score) AS PART2_III_1_score, AVG(PART2_III_2_score) AS PART2_III_2_score, AVG(PART2_III_3_score) AS PART2_III_3_score, AVG(PART2_III_4_score) AS PART2_III_4_score,
             AVG(PART2_IV_1_score) AS PART2_IV_1_score, AVG(PART2_IV_2_score) AS PART2_IV_2_score, AVG(PART2_IV_3_score) AS PART2_IV_3_score, AVG(PART2_IV_4_score) AS PART2_IV_4_score, AVG(PART2_IV_5_score) AS PART2_IV_5_score, AVG(PART2_IV_6_score) AS PART2_IV_6_score, AVG(PART2_IV_7_score) AS PART2_IV_7_score, AVG(PART2_IV_8_score) AS PART2_IV_8_score, AVG(PART2_IV_9_score) AS PART2_IV_9_score,
-            AVG(PART2_V_1_1_score) AS PART2_V_1_1_score, AVG(PART2_V_1_2_score) AS PART2_V_1_2_score, AVG(PART2_V_2_1_score) AS PART2_V_2_1_score, AVG(PART2_V_2_2_score) AS PART2_V_2_2_score, AVG(PART2_V_3_1_score) AS PART2_V_3_1_score, AVG(PART2_V_3_2_score) AS PART2_V_3_2_score, AVG(PART2_V_4_1_score) AS PART2_V_4_1_score, AVG(PART2_V_4_2_score) AS PART2_V_4_2_score, AVG(PART2_V_5_1_score) AS PART2_V_5_1_score, AVG(PART2_V_5_2_score) AS PART2_V_5_2_score,
+            AVG(PART2_V_1_score) AS PART2_V_1_score, AVG(PART2_V_2_score) AS PART2_V_2_score, AVG(PART2_V_3_score) AS PART2_V_3_score, AVG(PART2_V_4_score) AS PART2_V_4_score, AVG(PART2_V_5_score) AS PART2_V_5_score, 
             AVG(PART2_VI_1_score) AS PART2_VI_1_score, AVG(PART2_VI_2_score) AS PART2_VI_2_score, AVG(PART2_VI_3_score) AS PART2_VI_3_score, AVG(PART2_VI_4_score) AS PART2_VI_4_score, AVG(PART2_VI_5_score) AS PART2_VI_5_score,
             AVG(PART2_VII_1_score) AS PART2_VII_1_score, AVG(PART2_VII_2_score) AS PART2_VII_2_score, AVG(PART2_VII_3_score) AS PART2_VII_3_score, AVG(PART2_VII_4_score) AS PART2_VII_4_score, AVG(PART2_VII_5_score) AS PART2_VII_5_score,
             AVG(PART2_VIII_1_score) AS PART2_VIII_1_score, AVG(PART2_VIII_2_score) AS PART2_VIII_2_score, AVG(PART2_VIII_3_score) AS PART2_VIII_3_score, AVG(PART2_VIII_4_score) AS PART2_VIII_4_score
@@ -835,7 +902,7 @@ app.get('/api/admin-scores-campusCom', (req, res) => {
             PART2_II_total: (averages.PART2_II_1_score || 0) + (averages.PART2_II_2_score || 0) + (averages.PART2_II_3_score || 0) + (averages.PART2_II_4_score || 0) + (averages.PART2_II_5_score || 0),
             PART2_III_total: (averages.PART2_III_1_score || 0) + (averages.PART2_III_2_score || 0) + (averages.PART2_III_3_score || 0) + (averages.PART2_III_4_score || 0),
             PART2_IV_total: (averages.PART2_IV_1_score || 0) + (averages.PART2_IV_2_score || 0) + (averages.PART2_IV_3_score || 0) + (averages.PART2_IV_4_score || 0) + (averages.PART2_IV_5_score || 0) + (averages.PART2_IV_6_score || 0) + (averages.PART2_IV_7_score || 0) + (averages.PART2_IV_8_score || 0) + (averages.PART2_IV_9_score || 0),
-            PART2_V_total: (averages.PART2_V_1_1_score || 0) + (averages.PART2_V_1_2_score || 0) + (averages.PART2_V_2_1_score || 0) + (averages.PART2_V_2_2_score || 0) + (averages.PART2_V_3_1_score || 0) + (averages.PART2_V_3_2_score || 0) + (averages.PART2_V_4_1_score || 0) + (averages.PART2_V_4_2_score || 0) + (averages.PART2_V_5_1_score || 0) + (averages.PART2_V_5_2_score || 0),
+            PART2_V_total: (averages.PART2_V_1_score || 0) +  (averages.PART2_V_2_score || 0) + (averages.PART2_V_3_score || 0) + (averages.PART2_V_4_score || 0)  + (averages.PART2_V_5_score || 0) ,
             PART2_VI_total: (averages.PART2_VI_1_score || 0) + (averages.PART2_VI_2_score || 0) + (averages.PART2_VI_3_score || 0) + (averages.PART2_VI_4_score || 0) + (averages.PART2_VI_5_score || 0),
             PART2_VII_total: (averages.PART2_VII_1_score || 0) + (averages.PART2_VII_2_score || 0) + (averages.PART2_VII_3_score || 0) + (averages.PART2_VII_4_score || 0) + (averages.PART2_VII_5_score || 0),
             PART2_VIII_total: (averages.PART2_VIII_1_score || 0) + (averages.PART2_VIII_2_score || 0) + (averages.PART2_VIII_3_score || 0) + (averages.PART2_VIII_4_score || 0)
@@ -1086,35 +1153,223 @@ app.get('/api/option-counts', async (req, res) => {
     console.log(school_no);
     console.log(class_no);
 
-    // 查询每个选项的选择人数
-    const optionCountsQuery = `
+    // 查询班级总人数
+    const classSizeQuery = `
         SELECT
-            ${question} AS option_value,
-            COUNT(*) AS count
+            COUNT(DISTINCT stu_no) AS total_students
         FROM
             gradeHave
         WHERE
-            school_no = ? AND class_no = ? AND ${question} IS NOT NULL
-        GROUP BY
-            ${question}
+            school_no = ? AND class_no = ?
     `;
+    
 
-    db.query(optionCountsQuery, [school_no, class_no], (err, results) => {
+    db.query(classSizeQuery, [school_no, class_no], (err, classSizeResults) => {
         if (err) {
             console.error('Database query failed:', err);
             return res.status(500).json({ message: 'Server error' });
         }
 
-        // 格式化结果为对象形式
-        const optionCounts = results.reduce((acc, row) => {
-            acc[row.option_value] = row.count;
-            return acc;
-        }, {});
+        const totalStudents = classSizeResults[0].total_students;
+        console.log("查询到班级的总人数", totalStudents);
 
-        console.log("选择人数", optionCounts);
-        res.json({ optionCounts });
+        // 查询每个选项的选择人数
+        const optionCountsQuery = `
+            SELECT
+                ${question} AS option_value,
+                COUNT(*) AS count
+            FROM
+                gradeHave
+            WHERE
+                school_no = ? AND class_no = ? AND ${question} IS NOT NULL
+            GROUP BY
+                ${question}
+        `;
+
+        db.query(optionCountsQuery, [school_no, class_no], (err, optionResults) => {
+            if (err) {
+                console.error('Database query failed:', err);
+                return res.status(500).json({ message: 'Server error' });
+            }
+
+            // 计算选择人数比例并格式化结果为对象形式
+            const optionCounts = optionResults.reduce((acc, row) => {
+                const ratio = ((row.count / totalStudents) * 100).toFixed(2);
+                acc[row.option_value] = parseFloat(ratio);
+                return acc;
+            }, {});
+
+            console.log("选择人数比", optionCounts);
+            res.json({ optionCounts });
+        });
     });
 });
+
+
+app.get('/api/option-percentages-campusCom', async (req, res) => {
+    console.log("校区比较")
+    const question = req.query.question;
+    const selectedSchool = req.query.school;
+    const school_no = selectedSchool.charAt(0);
+
+    console.log("人数比", school_no);
+
+    const questionColumn = `${question}_score`;
+    const peerAccuracyQuery = `
+        SELECT
+            SUM(CASE WHEN ${questionColumn} = 1 THEN 1 ELSE 0 END) AS correct_count,
+            COUNT(*) AS total_count
+        FROM gradeHave
+        WHERE school_no = ?
+    `;
+
+    db.query(peerAccuracyQuery, [school_no], (err, results) => {
+        if (err) {
+            console.error('Database query failed:', err);
+            return res.status(500).json({ message: 'Server error' });
+        }
+
+        const { correct_count, total_count } = results[0];
+        console.log("正确人数", correct_count);
+        console.log("总人数", total_count);
+        const optionPercentages = `${correct_count}/${total_count}`;
+        console.log("正确人数比例", optionPercentages);
+        res.json({ optionPercentages });
+    });
+});
+
+app.get('/api/option-accuracy-campusCom', async (req, res) => {
+    const question = req.query.question;
+    const selectedSchool = req.query.school;
+    const school_no = selectedSchool.charAt(0);
+
+    console.log("学校编号", school_no);
+
+    const questionColumn = `${question}_score`;
+    const peerAccuracyQuery = `
+        SELECT
+            SUM(CASE WHEN ${questionColumn} = 1 THEN 1 ELSE 0 END) AS correct_count,
+            COUNT(*) AS total_count
+        FROM gradeHave
+        WHERE school_no = ?
+    `;
+
+    db.query(peerAccuracyQuery, [school_no], (err, results) => {
+        if (err) {
+            console.error('数据库查询失败:', err);
+            return res.status(500).json({ message: '服务器错误' });
+        }
+
+        const { correct_count, total_count } = results[0];
+        console.log("正确人数", correct_count);
+        console.log("总人数", total_count);
+
+        // 计算正确率，防止除以零
+        const accuracyRate = total_count > 0 ? (correct_count / total_count) * 100 : 0;
+        console.log("正确率", accuracyRate.toFixed(2));
+
+        res.json({ accuracyRate: accuracyRate.toFixed(2) });
+    });
+});
+
+app.get('/api/option-accuracy', async (req, res) => {
+    const question = req.query.question;
+    const selectedClass = req.query.class;
+    const school_no = selectedClass.charAt(0);
+    const class_no = selectedClass.charAt(1);
+
+    console.log("学校编号", school_no);
+    console.log("班级编号", class_no);
+
+    const questionColumn = `${question}_score`;
+    const peerAccuracyQuery = `
+        SELECT
+            SUM(CASE WHEN ${questionColumn} = 1 THEN 1 ELSE 0 END) AS correct_count,
+            COUNT(*) AS total_count
+        FROM gradeHave
+        WHERE school_no = ? AND class_no = ?
+    `;
+
+    db.query(peerAccuracyQuery, [school_no, class_no], (err, results) => {
+        if (err) {
+            console.error('数据库查询失败:', err);
+            return res.status(500).json({ message: '服务器错误' });
+        }
+
+        const { correct_count, total_count } = results[0];
+        console.log("正确人数", correct_count);
+        console.log("总人数", total_count);
+
+        // 计算正确率，防止除以零
+        const accuracyRate = total_count > 0 ? (correct_count / total_count) * 100 : 0;
+        console.log("正确率", accuracyRate.toFixed(2));
+
+        res.json({ accuracyRate: accuracyRate.toFixed(2) });
+    });
+});
+
+// 获取每个选项的选择人数
+app.get('/api/option-counts-campusCom', async (req, res) => {
+    console.log("校区比较");
+    const question = req.query.question; // 例如: 'PART_I_1'
+    const selectedSchool = req.query.school;
+    const school_no = selectedSchool.charAt(0);
+
+    console.log(question);
+    console.log(school_no);
+
+    // 查询校区总人数
+    const campusSizeQuery = `
+        SELECT
+            COUNT(CONCAT(LPAD(class_no, 2, '0'), '_', stu_no)) AS total_students
+        FROM
+            gradeHave
+        WHERE
+            school_no = ?
+    `;
+
+    db.query(campusSizeQuery, [school_no], (err, campusSizeResults) => {
+        if (err) {
+            console.error('Database query failed:', err);
+            return res.status(500).json({ message: 'Server error' });
+        }
+
+        const totalStudents = campusSizeResults[0].total_students;
+        console.log("查询到校区的总人数", totalStudents);
+
+        // 查询每个选项的选择人数
+        const optionCountsQuery = `
+            SELECT
+                ${question} AS option_value,
+                COUNT(*) AS count
+            FROM
+                gradeHave
+            WHERE
+                school_no = ? AND ${question} IS NOT NULL
+            GROUP BY
+                ${question}
+        `;
+
+        db.query(optionCountsQuery, [school_no], (err, optionResults) => {
+            if (err) {
+                console.error('Database query failed:', err);
+                return res.status(500).json({ message: 'Server error' });
+            }
+
+            // 计算选择人数比例，并将比例乘以100保留两位小数
+            const optionCounts = optionResults.reduce((acc, row) => {
+                console.log("选择人数", row.count);
+                const ratio = ((row.count / totalStudents) * 100).toFixed(2); // 乘以100并保留两位小数
+                acc[row.option_value] = parseFloat(ratio); // 将字符串转换回浮点数
+                return acc;
+            }, {});
+
+            console.log("选择人数比", optionCounts);
+            res.json({ optionCounts });
+        });
+    });
+});
+
 
 //对于没有听力原文或者阅读原文的题目来说
 app.get('/api/question_single', (req, res) => {
@@ -1431,12 +1686,12 @@ app.get('/teacher/:username', (req, res) => {
 app.get('/part2_9/errors/:username', (req, res) => {
     const username = req.params.username;
     const sql = `
-        SELECT 
-            \`WordPhrase choice\`, \`Pronouns & Determiners\`, Verbs, 
-            Conciseness, Style, \`Adverbs & Adjectives\`, Tense, Articles, \`Singular-Plural nouns\`, 
-            Prepositions, Punctuation, \`Spellings & Typos\`, \`Vague Words\`, Contractions, 
+        SELECT
+            \`WordPhrase choice\`, \`Pronouns & Determiners\`, Verbs,
+            Conciseness, Style, \`Adverbs & Adjectives\`, Tense, Articles, \`Singular-Plural nouns\`,
+            Prepositions, Punctuation, \`Spellings & Typos\`, \`Vague Words\`, Contractions,
             \`English Style-US\`, Conjunctions, Others, \`Capitalization & Spacing\`, \`Subject-verb agreement\`
-        FROM part2_9 
+        FROM part2_9
         WHERE name = ?
     `;
 
@@ -1458,27 +1713,24 @@ app.get('/part2_9/errors/:username', (req, res) => {
 app.get('/part2_9/errors/class/:school_no/:class_no', (req, res) => {
     const { school_no, class_no } = req.params;
     const sql = `
-        SELECT 
-            SUM(\`WordPhrase choice\`) AS \`WordPhrase choice\`, 
-            SUM(\`Pronouns & Determiners\`) AS \`Pronouns & Determiners\`, 
+        SELECT
+            SUM(\`WordPhrase choice\`) AS \`WordPhrase choice\`,
+            SUM(\`Pronouns & Determiners\`) AS \`Pronouns & Determiners\`,
             SUM(Verbs) AS Verbs,
-            SUM(Conciseness) AS Conciseness, 
-            SUM(Style) AS Style, 
-            SUM(\`Adverbs & Adjectives\`) AS \`Adverbs & Adjectives\`, 
-            SUM(Tense) AS Tense, 
-            SUM(Articles) AS Articles, 
+            SUM(Conciseness) AS Conciseness,
+            SUM(\`Adverbs & Adjectives\`) AS \`Adverbs & Adjectives\`,
+            SUM(Tense) AS Tense,
+            SUM(Articles) AS Articles,
             SUM(\`Singular-Plural nouns\`) AS \`Singular-Plural nouns\`,
-            SUM(Prepositions) AS Prepositions, 
-            SUM(Punctuation) AS Punctuation, 
-            SUM(\`Spellings & Typos\`) AS \`Spellings & Typos\`, 
-            SUM(\`Vague Words\`) AS \`Vague Words\`, 
-            SUM(Contractions) AS Contractions, 
-            SUM(\`English Style-US\`) AS \`English Style-US\`, 
-            SUM(Conjunctions) AS Conjunctions, 
-            SUM(Others) AS Others, 
-            SUM(\`Capitalization & Spacing\`) AS \`Capitalization & Spacing\`, 
-            SUM(\`Subject-verb agreement\`) AS \`Subject-verb agreement\`
-        FROM part2_9 
+            SUM(Prepositions) AS Prepositions,
+            SUM(Punctuation) AS Punctuation,
+            SUM(\`Spellings & Typos\`) AS \`Spellings & Typos\`,
+            SUM(Contractions) AS Contractions,
+            SUM(Conjunctions) AS Conjunctions,
+            SUM(\`Capitalization & Spacing\`) AS \`Capitalization & Spacing\`,
+            SUM(\`Subject-verb agreement\`) AS \`Subject-verb agreement\`,
+            SUM(Others) AS Others
+        FROM part2_9
         WHERE school_no = ? AND class_no = ?
     `;
 
@@ -1619,7 +1871,6 @@ app.get('/part2_9/overall', (req, res) => {
                 SUM(\`Pronouns & Determiners\`) AS \`Pronouns & Determiners\`, 
                 SUM(Verbs) AS Verbs,
                 SUM(Conciseness) AS Conciseness, 
-                SUM(Style) AS Style, 
                 SUM(\`Adverbs & Adjectives\`) AS \`Adverbs & Adjectives\`, 
                 SUM(Tense) AS Tense, 
                 SUM(Articles) AS Articles, 
@@ -1627,13 +1878,11 @@ app.get('/part2_9/overall', (req, res) => {
                 SUM(Prepositions) AS Prepositions, 
                 SUM(Punctuation) AS Punctuation, 
                 SUM(\`Spellings & Typos\`) AS \`Spellings & Typos\`, 
-                SUM(\`Vague Words\`) AS \`Vague Words\`, 
                 SUM(Contractions) AS Contractions, 
-                SUM(\`English Style-US\`) AS \`English Style-US\`, 
                 SUM(Conjunctions) AS Conjunctions, 
-                SUM(Others) AS Others, 
                 SUM(\`Capitalization & Spacing\`) AS \`Capitalization & Spacing\`, 
-                SUM(\`Subject-verb agreement\`) AS \`Subject-verb agreement\`
+                SUM(\`Subject-verb agreement\`) AS \`Subject-verb agreement\`,
+                SUM(Others) AS Others
             FROM part2_9
         `;
 
@@ -1659,9 +1908,9 @@ app.get('/part2_9/campus/:school_no', (req, res) => {
 
     // 获取校区的平均数据
     const avgSql = `
-        SELECT 
-            AVG(score) AS averageScore, 
-            AVG(word_counts) AS averageWordCounts, 
+        SELECT
+            AVG(score) AS averageScore,
+            AVG(word_counts) AS averageWordCounts,
             AVG(sentence_counts) AS averageSentenceCounts
         FROM part2_9
         WHERE school_no = ?
@@ -1683,26 +1932,23 @@ app.get('/part2_9/campus/:school_no', (req, res) => {
 
         // 获取校区的错误类型数据
         const errorTypesSql = `
-            SELECT 
-                SUM(\`WordPhrase choice\`) AS \`WordPhrase choice\`, 
-                SUM(\`Pronouns & Determiners\`) AS \`Pronouns & Determiners\`, 
+            SELECT
+                SUM(\`WordPhrase choice\`) AS \`WordPhrase choice\`,
+                SUM(\`Pronouns & Determiners\`) AS \`Pronouns & Determiners\`,
                 SUM(Verbs) AS Verbs,
-                SUM(Conciseness) AS Conciseness, 
-                SUM(Style) AS Style, 
-                SUM(\`Adverbs & Adjectives\`) AS \`Adverbs & Adjectives\`, 
-                SUM(Tense) AS Tense, 
-                SUM(Articles) AS Articles, 
+                SUM(Conciseness) AS Conciseness,
+                SUM(\`Adverbs & Adjectives\`) AS \`Adverbs & Adjectives\`,
+                SUM(Tense) AS Tense,
+                SUM(Articles) AS Articles,
                 SUM(\`Singular-Plural nouns\`) AS \`Singular-Plural nouns\`,
-                SUM(Prepositions) AS Prepositions, 
-                SUM(Punctuation) AS Punctuation, 
-                SUM(\`Spellings & Typos\`) AS \`Spellings & Typos\`, 
-                SUM(\`Vague Words\`) AS \`Vague Words\`, 
-                SUM(Contractions) AS Contractions, 
-                SUM(\`English Style-US\`) AS \`English Style-US\`, 
-                SUM(Conjunctions) AS Conjunctions, 
-                SUM(Others) AS Others, 
-                SUM(\`Capitalization & Spacing\`) AS \`Capitalization & Spacing\`, 
-                SUM(\`Subject-verb agreement\`) AS \`Subject-verb agreement\`
+                SUM(Prepositions) AS Prepositions,
+                SUM(Punctuation) AS Punctuation,
+                SUM(\`Spellings & Typos\`) AS \`Spellings & Typos\`,
+                SUM(Contractions) AS Contractions,
+                SUM(Conjunctions) AS Conjunctions,
+                SUM(\`Capitalization & Spacing\`) AS \`Capitalization & Spacing\`,
+                SUM(\`Subject-verb agreement\`) AS \`Subject-verb agreement\`,
+                SUM(Others) AS Others
             FROM part2_9
             WHERE school_no = ?
         `;
@@ -1838,50 +2084,50 @@ app.get('/api/option-accuracy', async (req, res) => {
 
 ///学生个体成绩获取
 app.get('/api/student-total-score', (req, res) => {
-        console.log("进入学生成绩查询");
-        const name = req.query.name;
-        console.log("name", name);
-    
-        if (!name) {
-            return res.status(400).json({ message: 'Name parameter is required' });
-        }
-    
-        // 查询学生的 school_no, class_no 和 stu_no
-        const studentInfoQuery = `SELECT school_no, class_no, stu_no FROM stu_class WHERE user = ?`;
-    
-        db.query(studentInfoQuery, [name], (err, studentInfoResults) => {
-            if (err) {
-                console.error('Database query failed:', err);
-                return res.status(500).json({ message: 'Server error' });
-            }
-    
-            if (studentInfoResults.length === 0) {
-                return res.status(404).json({ message: 'Student not found' });
-            }
-    
-            let { school_no, class_no, stu_no } = studentInfoResults[0];
-            school_no = school_no.trim();
-            class_no = class_no.trim();
-            stu_no = stu_no.trim();
-            console.log(school_no, class_no, stu_no);
-    
-            // 查询学生成绩
-            const studentScoresQuery = `SELECT score FROM gradeHave WHERE school_no = ? AND class_no = ? AND stu_no = ?`;
-    
-            console.log('Executing query:', studentScoresQuery, 'with params:', [school_no, class_no, stu_no]);
-            db.query(studentScoresQuery, [school_no, class_no, stu_no], (err, studentScoresResults) => {
-                if (err) {
-                    console.error('Database query failed:', err);
-                    return res.status(500).json({ message: 'Server error' });
-                }
-    
-                if (studentScoresResults.length === 0) {
-                    return res.status(404).json({ message: 'Student scores not found' });
-                }
-    
-                const studentScores = studentScoresResults[0];
-                console.log(studentScores);
-                res.json({ scores: studentScores });
-            });
-        });
+    console.log("进入学生成绩查询");
+    const name = req.query.name;
+    console.log("name", name);
+
+    if (!name) {
+        return res.status(400).json({ message: 'Name parameter is required' });
+    }
+
+    // 查询学生的 school_no, class_no 和 stu_no
+    const studentInfoQuery = `SELECT school_no, class_no, stu_no FROM stu_class WHERE user = ?`;
+
+    db.query(studentInfoQuery, [name], (err, studentInfoResults) => {
+        if (err) {
+            console.error('Database query failed:', err);
+            return res.status(500).json({ message: 'Server error' });
+        }
+
+        if (studentInfoResults.length === 0) {
+            return res.status(404).json({ message: 'Student not found' });
+        }
+
+        let { school_no, class_no, stu_no } = studentInfoResults[0];
+        school_no = school_no.trim();
+        class_no = class_no.trim();
+        stu_no = stu_no.trim();
+        console.log(school_no, class_no, stu_no);
+
+        // 查询学生成绩
+        const studentScoresQuery = `SELECT score FROM gradeHave WHERE school_no = ? AND class_no = ? AND stu_no = ?`;
+
+        console.log('Executing query:', studentScoresQuery, 'with params:', [school_no, class_no, stu_no]);
+        db.query(studentScoresQuery, [school_no, class_no, stu_no], (err, studentScoresResults) => {
+            if (err) {
+                console.error('Database query failed:', err);
+                return res.status(500).json({ message: 'Server error' });
+            }
+
+            if (studentScoresResults.length === 0) {
+                return res.status(404).json({ message: 'Student scores not found' });
+            }
+
+            const studentScores = studentScoresResults[0];
+            console.log(studentScores);
+            res.json({ scores: studentScores });
+        });
     });
+});

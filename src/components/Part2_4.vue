@@ -1,19 +1,66 @@
 <template>
-    <div>
+    <div class="main">
       <header class="header">
-        <h2>Ⅳ. Read and circle（读一读，选择最佳答案，将字母代号写在前面的括号内）：【语法-句法】</h2>
+        <h2>Ⅳ. Read and circle（读一读，选择最佳答案，将字母代号写在前面的括号内）：</h2>
+        <h2>【语法-句法】</h2>
+        <div class="menu">
+          <button @click="goBack">返回主页</button>
 
         <div v-if="permission === '2'" class="class-select">
-            <label for="class-select">选择班级：</label>
-            <select id="class-select" v-model="selectedClass" @change="fetchData">
+            <label for="compare-type-select">选择对比类型：</label>
+            <select id="compare-type-select" v-model="compareType" @change="fetchData">
+              <option value="single">单个班级</option>
+              <option value="double-class">两个班级</option>
+              <option value="double-campus">两个校区</option>
+            </select>
+
+            <div v-if="compareType === 'single'">
+              <label for="class-select">选择班级：</label>
+              <select id="class-select" v-model="selectedClass" @change="fetchData">
                 <option value="11">张江一班</option>
                 <option value="12">张江二班</option>
                 <option value="13">张江三班</option>
                 <option value="21">滨江一班</option>
                 <option value="22">滨江二班</option>
                 <option value="23">滨江三班</option>
-            </select>
-        </div>
+              </select>
+            </div>
+
+            <div v-if="compareType === 'double-class'">
+              <label for="class-select-1">选择班级 1：</label>
+              <select id="class-select-1" v-model="selectedClass1" @change="fetchData">
+                <option value="11">张江一班</option>
+                <option value="12">张江二班</option>
+                <option value="13">张江三班</option>
+                <option value="21">滨江一班</option>
+                <option value="22">滨江二班</option>
+                <option value="23">滨江三班</option>
+              </select>
+              <label for="class-select-2">选择班级 2：</label>
+              <select id="class-select-2" v-model="selectedClass2" @change="fetchData">
+                <option value="11">张江一班</option>
+                <option value="12">张江二班</option>
+                <option value="13">张江三班</option>
+                <option value="21">滨江一班</option>
+                <option value="22">滨江二班</option>
+                <option value="23">滨江三班</option>
+              </select>
+            </div>
+
+            <div v-if="compareType === 'double-campus'">
+              <label for="campus-select-1">选择校区1：</label>
+              <select id="campus-select-1" v-model="selectedCampus1" @change="fetchData">
+                <option value="1">张江校区</option>
+                <option value="2">滨江校区</option>
+              </select>
+
+              <label for="campus-select-2">选择校区2：</label>
+              <select id="campus-select-2" v-model="selectedCampus2" @change="fetchData">
+                <option value="1">张江校区</option>
+                <option value="2">滨江校区</option>
+              </select>
+            </div>
+          </div>
 
         <div v-if="permission === '0'" class="class-select">
             <label for="class-select">选择班级：</label>
@@ -21,6 +68,7 @@
                 <option v-for="cls in classOptions" :key="cls" :value="cls">{{ getClassDisplayName(cls) }}</option>
             </select>
         </div>
+       </div>
       </header>
        <div v-for="(question, index) in questions" :key="index">
      <div class="part-background">
@@ -30,13 +78,13 @@
         <div class="left-column"> 
           <!--题号+难度-->
           <div class="title">
-            <p :class="{highlighted: permission === '1' && questionData[question]?.studentAnswer !== questionData[question]?.correctAnswer }">
+            <p :class="{wrong: permission === '1' && questionData[question]?.studentAnswer !== questionData[question]?.correctAnswer }">
               {{ index + 1 }}、 {{ staticData[question]?.difficulty }}</p>
           </div>
       
           <!--题目描述-->
           <div v-if="questionDescriptions[question]">
-                <p style="font-size:18px">题目描述：<span v-html="questionDescriptions[question]"></span></p>
+                <p style="font-size:18px;line-height:1.8">题目描述：<span v-html="questionDescriptions[question]"></span></p>
           </div>
           <!-- 正确答案 -->
           <div class="corrent_answer">
@@ -50,46 +98,219 @@
         </div>
         <div class="right-column table-container"> 
 
-          <!--教师端、管理员端-->
-          <div v-if="permission === '0' || permission === '2'">
-          <table class="custom-border" border="1" cellspacing="0" width=500px height=160px bgcolor=white>
-            <tbody>
-            <tr>
-              <td style="width: 25%; text-align: center; color: black; font-size:16px">选项</td>
-              <td style="width: 25%; text-align: center; color: black; font-size:16px" v-for="(option, optIndex) in options" :key="optIndex">
-                <span v-html="highlightTextNew(option.text, questionData[question]?.correctAnswer, staticConOption[question]?.confuse)"></span>
-              </td>
-            </tr>
-            <tr>
-              <td style="height: 33.333%; text-align: center; color: black; font-size:16px">选择人数</td>
-              <td style="height: 33.333%; text-align: center; color: black; font-size:16px" v-for="(option, optIndex) in options" :key="optIndex">
-                {{ questionData[question]?.optionCounts[option.value] || 0 }}
-              </td>
-            </tr>
-            <tr>
-              <td colspan=4 style="color: black; font-size:16px"><span class="option-percentages-container">&nbsp;&nbsp;&nbsp;&nbsp;正确率：{{ questionData[question]?.accuracyPercentages || '0' }}%</span></td>
-            </tr>
-            </tbody>
-          </table>
-          </div>
+          <!--教师端-->
+            <div v-if="permission === '0'">
+              <table class="custom-border" border="1" cellspacing="0" width="600px" height="200px" bgcolor="white">
+                <tbody>
+                  <tr>
+                    <td style="width: 50%; text-align: center; color: black; font-size:17px">选项</td>
+                    <td style="height: 20%; text-align: center; color: black; font-size:17px">作答率</td>
+                  </tr>
+                  <tr>
+                    <td style="height: 20%; text-align: center; color: black; font-size:17px"
+                      v-for="(option, optIndex) in firstOption" :key="optIndex">
+                      <span v-html="highlightTextNew(option.text, questionData[question]?.correctAnswer, staticConOption[question]?.confuse)"></span>
+                    </td>
+                    <td style="height: 20%; text-align: center; color: black; font-size:17px"
+                      v-for="(option, optIndex) in firstOption" :key="optIndex">
+                      {{ questionData[question]?.optionCounts[option.value] || 0 }}%
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="height: 20%; text-align: center; color: black; font-size:17px"
+                      v-for="(option, optIndex) in secondOption" :key="optIndex">
+                      <span v-html="highlightTextNew(option.text, questionData[question]?.correctAnswer, staticConOption[question]?.confuse)"></span>
+                    </td>
+                    <td style="height: 20%; text-align: center; color: black; font-size:17px"
+                      v-for="(option, optIndex) in secondOption" :key="optIndex">
+                      {{ questionData[question]?.optionCounts[option.value] || 0 }}%
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="height: 20%; text-align: center; color: black; font-size:17px"
+                      v-for="(option, optIndex) in thirdOption" :key="optIndex">
+                      <span v-html="highlightTextNew(option.text, questionData[question]?.correctAnswer, staticConOption[question]?.confuse)"></span>
+                    </td>
+                    <td style="height: 20%; text-align: center; color: black; font-size:17px"
+                      v-for="(option, optIndex) in thirdOption" :key="optIndex">
+                      {{ questionData[question]?.optionCounts[option.value] || 0 }}%
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
 
           <!--学生端-->
           <div v-if="permission === '1'">
             <table class="custom-border" border="1" cellspacing="0" width=500px height=160px bgcolor=white>
             <tbody>
             <tr>
-              <td style="height: 50%; width: 25%; text-align: center; color: black; font-size:16px">选项</td>
-              <td style="width: 25%; text-align: center; color: black; font-size:16px" v-for="(option, optIndex) in options" :key="optIndex">
+              <td style="height: 50%; width: 25%; text-align: center; color: black; font-size:17px">选项</td>
+              <td style="width: 25%; text-align: center; color: black; font-size:17px" v-for="(option, optIndex) in options" :key="optIndex">
                 <span v-html="highlightTextNew(option.text, questionData[question]?.correctAnswer, staticConOption[question]?.confuse)"></span>
               </td>
             </tr>
             <tr>
-              <td colspan=4 style="color: black; font-size:16px"><p class="option-percentages-container">&nbsp;&nbsp;&nbsp;&nbsp;学生答案：{{ questionData[question]?.studentAnswer }}</p>
+              <td colspan=4 style="color: black; font-size:17px"><p class="option-percentages-container">&nbsp;&nbsp;&nbsp;&nbsp;学生答案：{{ questionData[question]?.studentAnswer }}</p>
               <p class="option-percentages-container">&nbsp;&nbsp;&nbsp;&nbsp;同伴正确率：{{ questionData[question]?.peerAccuracy }}%</p></td>
             </tr>
             </tbody>
           </table>
           </div>
+
+          <!--管理员端-->
+            <div v-if="permission === '2'">
+              <!--单个班级表格-->
+              <table v-if="compareType === 'single'" class="custom-border" border="1" cellspacing="0" width="600px" height="200px" bgcolor="white">
+              <tbody>
+                  <tr>
+                    <td style="width: 50%; text-align: center; color: black; font-size:17px">选项</td>
+                    <td style="height: 20%; text-align: center; color: black; font-size:17px">作答率</td>
+                  </tr>
+                  <tr>
+                    <td style="height: 20%; text-align: center; color: black; font-size:17px"
+                      v-for="(option, optIndex) in firstOption" :key="optIndex">
+                      <span v-html="highlightTextNew(option.text, questionData[question]?.correctAnswer, staticConOption[question]?.confuse)"></span>
+                    </td>
+                    <td style="height: 20%; text-align: center; color: black; font-size:17px"
+                      v-for="(option, optIndex) in firstOption" :key="optIndex">
+                      {{ questionData[question]?.optionCounts1[option.value] || 0 }}%
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="height: 20%; text-align: center; color: black; font-size:17px"
+                      v-for="(option, optIndex) in secondOption" :key="optIndex">
+                      <span v-html="highlightTextNew(option.text, questionData[question]?.correctAnswer, staticConOption[question]?.confuse)"></span>
+                    </td>
+                    <td style="height: 20%; text-align: center; color: black; font-size:17px"
+                      v-for="(option, optIndex) in secondOption" :key="optIndex">
+                      {{ questionData[question]?.optionCounts1[option.value] || 0 }}%
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="height: 20%; text-align: center; color: black; font-size:17px"
+                      v-for="(option, optIndex) in thirdOption" :key="optIndex">
+                      <span v-html="highlightTextNew(option.text, questionData[question]?.correctAnswer, staticConOption[question]?.confuse)"></span>
+                    </td>
+                    <td style="height: 20%; text-align: center; color: black; font-size:17px"
+                      v-for="(option, optIndex) in thirdOption" :key="optIndex">
+                      {{ questionData[question]?.optionCounts1[option.value] || 0 }}%
+                    </td>
+                  </tr>
+                </tbody>
+                </table>
+                  <!--两个班级对比表格-->
+                  <table v-if="compareType === 'double-class'" class="custom-border" border="1" cellspacing="0" width="600px" height="200px" bgcolor="white">
+                  <tbody>
+                  <tr>
+                    <td rowspan=2 style="width: 33.33%; text-align: center; color: black; font-size:17px">选项</td>
+                    <td colspan=2 style="height: 20%; text-align: center; color: black; font-size:17px">作答率</td>
+                  </tr>
+                  <tr>
+                    <td style="width: 33.33%; text-align: center; color: black; font-size:17px">班级1</td>
+                    <td style="width: 33.33%; text-align: center; color: black; font-size:17px">班级2</td>
+                  </tr>
+                  <tr>
+                    <td style="height: 20%; text-align: center; color: black; font-size:17px"
+                      v-for="(option, optIndex) in firstOption" :key="optIndex">
+                      <span v-html="highlightTextNew(option.text, questionData[question]?.correctAnswer, staticConOption[question]?.confuse)"></span>
+                    </td>
+                    <td style="height: 20%; text-align: center; color: black; font-size:17px"
+                      v-for="(option, optIndex) in firstOption" :key="optIndex">
+                      {{ questionData[question]?.optionCounts1[option.value] || 0 }}%
+                    </td>
+                    <td style="height: 20%; text-align: center; color: black; font-size:17px"
+                      v-for="(option, optIndex) in firstOption" :key="optIndex">
+                      {{ questionData[question]?.optionCounts2[option.value] || 0 }}%
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="height: 20%; text-align: center; color: black; font-size:17px"
+                      v-for="(option, optIndex) in secondOption" :key="optIndex">
+                      <span v-html="highlightTextNew(option.text, questionData[question]?.correctAnswer, staticConOption[question]?.confuse)"></span>
+                    </td>
+                    <td style="height: 20%; text-align: center; color: black; font-size:17px"
+                      v-for="(option, optIndex) in secondOption" :key="optIndex">
+                      {{ questionData[question]?.optionCounts1[option.value] || 0 }}%
+                    </td>
+                    <td style="height: 20%; text-align: center; color: black; font-size:17px"
+                      v-for="(option, optIndex) in secondOption" :key="optIndex">
+                      {{ questionData[question]?.optionCounts2[option.value] || 0 }}%
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="height: 20%; text-align: center; color: black; font-size:17px"
+                      v-for="(option, optIndex) in thirdOption" :key="optIndex">
+                      <span v-html="highlightTextNew(option.text, questionData[question]?.correctAnswer, staticConOption[question]?.confuse)"></span>
+                    </td>
+                    <td style="height: 20%; text-align: center; color: black; font-size:17px"
+                      v-for="(option, optIndex) in thirdOption" :key="optIndex">
+                      {{ questionData[question]?.optionCounts1[option.value] || 0 }}%
+                    </td>
+                    <td style="height: 20%; text-align: center; color: black; font-size:17px"
+                      v-for="(option, optIndex) in thirdOption" :key="optIndex">
+                      {{ questionData[question]?.optionCounts2[option.value] || 0 }}%
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <!--两个校区对比表格-->
+                  <table v-if="compareType === 'double-campus'" class="custom-border" border="1" cellspacing="0" width="600px" height="200px" bgcolor="white">
+                  <tbody>
+                  <tr>
+                    <td rowspan=2 style="width: 33.33%; text-align: center; color: black; font-size:17px">选项</td>
+                    <td colspan=2 style="height: 20%; text-align: center; color: black; font-size:17px">作答率</td>
+                  </tr>
+                  <tr>
+                    <td style="width: 33.33%; text-align: center; color: black; font-size:17px">校区1</td>
+                    <td style="width: 33.33%; text-align: center; color: black; font-size:17px">校区2</td>
+                  </tr>
+                  <tr>
+                    <td style="height: 20%; text-align: center; color: black; font-size:17px"
+                      v-for="(option, optIndex) in firstOption" :key="optIndex">
+                      <span v-html="highlightTextNew(option.text, questionData[question]?.correctAnswer, staticConOption[question]?.confuse)"></span>
+                    </td>
+                    <td style="height: 20%; text-align: center; color: black; font-size:17px"
+                      v-for="(option, optIndex) in firstOption" :key="optIndex">
+                      {{ questionData[question]?.optionCounts1[option.value] || 0 }}%
+                    </td>
+                    <td style="height: 20%; text-align: center; color: black; font-size:17px"
+                      v-for="(option, optIndex) in firstOption" :key="optIndex">
+                      {{ questionData[question]?.optionCounts2[option.value] || 0 }}%
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="height: 20%; text-align: center; color: black; font-size:17px"
+                      v-for="(option, optIndex) in secondOption" :key="optIndex">
+                      <span v-html="highlightTextNew(option.text, questionData[question]?.correctAnswer, staticConOption[question]?.confuse)"></span>
+                    </td>
+                    <td style="height: 20%; text-align: center; color: black; font-size:17px"
+                      v-for="(option, optIndex) in secondOption" :key="optIndex">
+                      {{ questionData[question]?.optionCounts1[option.value] || 0 }}%
+                    </td>
+                    <td style="height: 20%; text-align: center; color: black; font-size:17px"
+                      v-for="(option, optIndex) in secondOption" :key="optIndex">
+                      {{ questionData[question]?.optionCounts2[option.value] || 0 }}%
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="height: 20%; text-align: center; color: black; font-size:17px"
+                      v-for="(option, optIndex) in thirdOption" :key="optIndex">
+                      <span v-html="highlightTextNew(option.text, questionData[question]?.correctAnswer, staticConOption[question]?.confuse)"></span>
+                    </td>
+                    <td style="height: 20%; text-align: center; color: black; font-size:17px"
+                      v-for="(option, optIndex) in thirdOption" :key="optIndex">
+                      {{ questionData[question]?.optionCounts1[option.value] || 0 }}%
+                    </td>
+                    <td style="height: 20%; text-align: center; color: black; font-size:17px"
+                      v-for="(option, optIndex) in thirdOption" :key="optIndex">
+                      {{ questionData[question]?.optionCounts2[option.value] || 0 }}%
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+          </div>
+
         </div>
       </div>
      </div>
@@ -120,7 +341,13 @@ export default {
                 { text: 'C', value: 'C' }
             ],
             questionData: {},
+            questionData2: {},
             selectedClass: '11',
+            selectedClass1: '',
+            selectedClass2: '',
+            selectedCampus1: '',
+            selectedCampus2: '',
+            compareType: 'single',
             optionCounts: {},
             optionPercentages: {},
             staticData: {
@@ -129,10 +356,10 @@ export default {
                 'PART2_IV_3': { difficulty: '★★' },
                 'PART2_IV_4': { difficulty: '★★' },
                 'PART2_IV_5': { difficulty: '★★' },
-                'PART2_IV_6': { difficulty: '★★' },
-                'PART2_IV_7': { difficulty: '★★' },
-                'PART2_IV_8': { difficulty: '★★' },
-                'PART2_IV_9': { difficulty: '★★' }
+                'PART2_IV_6': { difficulty: '★★★' },
+                'PART2_IV_7': { difficulty: '★★★' },
+                'PART2_IV_8': { difficulty: '★★★' },
+                'PART2_IV_9': { difficulty: '★★★' }
             },
             
             staticConOption: {
@@ -147,20 +374,24 @@ export default {
                 'PART2_IV_9': { confuse: '' }
             },
             questionDescriptions: {
-                'PART2_IV_1': '(   ) 1. I _____ like dolls. They are for girls.A.am not	 		<span class="highlightedCon">B.can’t</span> 			   <span class="highlighted">C.don’t</span>',
-                'PART2_IV_2': '(   ) 2. --- What are those  ________ English?    --- They are shoes.<span class="highlighted">A.in</span>		 			B.on			   C.for',
-                'PART2_IV_3': '(   ) 3. It’s so cold. Don’t _____ the jacket.A.turn off				<span class="highlighted">B.take off</span>		   C.turn on',
-                'PART2_IV_4': '(   ) 4.--- What ____ is it?      	--- It’s a star.A.colour					B.season    	   <span class="highlighted">C.shape</span>',
-                'PART2_IV_5': '(   ) 5. In winter, I like ______ in the room.A.Sleep 				<span class="highlightedCon">B.sleepping</span>	   <span class="highlighted">C.sleeping</span>',
-                'PART2_IV_6': '(   ) 6. --- Is it summer? 			--- ______________.A.Yes, it’s autumn.<span class="highlighted">B.No, it’s autumn.</span>C.No, it’s summer .',
-                'PART2_IV_7': '(   ) 7. My nose __________ small but my feet ___________ big.A.are, is 				<span class="highlighted">B.is, are</span>			   C.is, is',
-                'PART2_IV_8': '(   ) 8. --- What ________ you do on Mother’s Day?--- I make a card. <span class="highlighted">A.do</span>					B.can			   C.are',
-                'PART2_IV_9': '(   ) 9. There are two Children’s days in ________ .<span class="highlighted">A.Japan</span>			    B.Thailand		   C.Singapore'
+                'PART2_IV_1': "I _____ like dolls. They are for girls.<br>A.am not  &nbsp;&nbsp;B.can't  &nbsp;&nbsp;C.don't",
+                'PART2_IV_2': "--- What are those  ________ English?    --- They are shoes.<br>A.in  &nbsp;&nbsp;B.on  &nbsp;&nbsp;C.for",
+                'PART2_IV_3': "It's so cold. Don't _____ the jacket.<br>A.turn off  &nbsp;&nbsp;B.take off  &nbsp;&nbsp;C.turn on",
+                'PART2_IV_4': "--- What ____ is it?      	--- It's a star.<br>A.colour  &nbsp;&nbsp;B.season  &nbsp;&nbsp;C.shape",
+                'PART2_IV_5': "In winter, I like ______ in the room.<br>A.Sleep  &nbsp;&nbsp;B.sleepping  &nbsp;&nbsp;C.sleeping",
+                'PART2_IV_6': "--- Is it summer? 			--- ______________.<br>A.Yes, it's autumn.  &nbsp;&nbsp;B.No, it's autumn.  &nbsp;&nbsp;C.No, it's summer .",
+                'PART2_IV_7': "My nose __________ small but my feet ___________ big.<br>A.are, is  &nbsp;&nbsp;B.is, are  &nbsp;&nbsp;C.is, is",
+                'PART2_IV_8': "--- What ________ you do on Mother's Day?--- I make a card.<br>A.do  &nbsp;&nbsp;B.can  &nbsp;&nbsp;C.are",
+                'PART2_IV_9': "There are two Children's days in ________ .<br>A.Japan  &nbsp;&nbsp;B.Thailand  &nbsp;&nbsp;C.Singapore"
             },
             classOptions: []
         };
     },
     methods: {
+        goBack() {
+            this.$router.go(-1); // 返回上一个页面
+        },
+
         async fetchClassOptions() {
             if (this.permission === '0') {
                 console.log("permission===0能进来吗");
@@ -209,7 +440,12 @@ export default {
                         const peerResponse = await axios.get('http://localhost:3000/api/peer-accuracy', {
                             params: { name: this.name, question }
                         });
-                        const peerAccuracy = peerResponse.data.accuracy * 100;
+                        
+                        //同伴正确率保留两位小数
+                        const rawAccuracy = peerResponse.data.accuracy * 100;
+                        const accuracyString = rawAccuracy.toFixed(2);    
+                        const accuracyNumber = parseFloat(accuracyString); 
+                        const peerAccuracy = accuracyNumber;
 
                         const referenceAnalysisResponse = await axios.get('http://localhost:3000/api/analysis', {
                             params: { question, options: studentAnswer }
@@ -225,42 +461,104 @@ export default {
                         };
                     } else if (this.permission === '2') {
                         // 获取选项人数比
-                        const optionResponse = await axios.get('http://localhost:3000/api/option-percentages', {
-                            params: { question, class: this.selectedClass }
-                        });
-                        console.log(optionResponse);
-                        const optionPercentages = optionResponse.data.optionPercentages;
-                        console.log(optionPercentages);
+                        if (this.compareType === 'single') {
+                            const optionResponse = await axios.get('http://localhost:3000/api/option-accuracy', {
+                                params: { question, class: this.selectedClass }
+                            });
+                            console.log(optionResponse);
+                            const optionPercentages = optionResponse.data.accuracyRate;
+                            console.log(optionPercentages);
 
-                        // 获取正确率
-                        const accuracyResponse = await axios.get('http://localhost:3000/api/option-accuracy', {
-                            params: { question, class: this.selectedClass }
-                        });
-                        console.log(accuracyResponse);
-                        const accuracyPercentages = accuracyResponse.data.accuracyRate;
-                        console.log(accuracyPercentages);
+                            const optionCountsResponse = await axios.get('http://localhost:3000/api/option-counts', {
+                                params: { question, class: this.selectedClass }
+                            });
+                            const optionCounts = optionCountsResponse.data.optionCounts;
 
-                        const optionCountsResponse = await axios.get('http://localhost:3000/api/option-counts', {
-                            params: { question, class: this.selectedClass }
-                        });
-                        const optionCounts = optionCountsResponse.data.optionCounts;
+                            console.log("能请求到解析吗");
+                            const referenceAnalysisResponse = await axios.get('http://localhost:3000/api/analysis', {
+                                params: { question, options: correctAnswer }
+                            });
+                            const referenceAnalysis = referenceAnalysisResponse.data.analysis;
 
-                        const referenceAnalysisResponse = await axios.get('http://localhost:3000/api/analysis', {
-                            params: { question, options: correctAnswer }
-                        });
-                        const referenceAnalysis = referenceAnalysisResponse.data.analysis;
+                            questionData[question] = {
+                                correctAnswer,
+                                listeningText,
+                                optionCounts1: optionCounts,
+                                optionCounts2: '0',
+                                optionPercentages1: optionPercentages,
+                                optionPercentages2: '0',
+                                referenceAnalysis
+                            };
 
-                        questionData[question] = {
-                            correctAnswer,
-                            listeningText,
-                            optionPercentages,
-                            optionCounts,
-                            referenceAnalysis,
-                            accuracyPercentages
-                        };
+                            this.optionCounts = optionCounts;
+                            console.log.optionCounts;
+                        } else if (this.compareType === 'double-class') {
+                            console.log("可以进来这里吗");
+                            console.log("第一个班级", this.selectedClass1);
+                            console.log("第二个班级", this.selectedClass2);
+                            const optionCounts1Response = await axios.get('http://localhost:3000/api/option-counts', {
+                                params: { question, class: this.selectedClass1 }
+                            });
+                            const optionCounts2Response = await axios.get('http://localhost:3000/api/option-counts', {
+                                params: { question, class: this.selectedClass2 }
+                            });
 
-                        this.optionCounts = optionCounts;
-                        console.log.optionCounts;
+                            const optionPercentages1Response = await axios.get('http://localhost:3000/api/option-accuracy', {
+                                params: { question, class: this.selectedClass1 }
+                            });
+                            const optionPercentages2Response = await axios.get('http://localhost:3000/api/option-accuracy', {
+                                params: { question, class: this.selectedClass2 }
+                            });
+
+                            const referenceAnalysisResponse = await axios.get('http://localhost:3000/api/analysis', {
+                                params: { question, options: correctAnswer }
+                            });
+                            const referenceAnalysis = referenceAnalysisResponse.data.analysis;
+
+                            questionData[question] = {
+                                correctAnswer,
+                                listeningText,
+                                optionCounts1: optionCounts1Response.data.optionCounts,
+                                optionCounts2: optionCounts2Response.data.optionCounts,
+                                optionPercentages1: optionPercentages1Response.data.accuracyRate,
+                                optionPercentages2: optionPercentages2Response.data.accuracyRate,
+                                referenceAnalysis
+                            };
+                            console.log("所需要展示的所有数据", questionData);
+                        } else if (this.compareType === 'double-campus') {
+                            console.log("可以进来这里吗");
+                            console.log("第一个校区", this.selectedCampus1);
+                            console.log("第二个校区", this.selectedCampus2);
+                            const optionCounts1Response = await axios.get('http://localhost:3000/api/option-counts-campusCom', {
+                                params: { question, school: this.selectedCampus1 }
+                            });
+                            const optionCounts2Response = await axios.get('http://localhost:3000/api/option-counts-campusCom', {
+                                params: { question, school: this.selectedCampus2 }
+                            });
+
+                            const optionPercentages1Response = await axios.get('http://localhost:3000/api/option-accuracy-campusCom', {
+                                params: { question, school: this.selectedCampus1 }
+                            });
+                            const optionPercentages2Response = await axios.get('http://localhost:3000/api/option-accuracy-campusCom', {
+                                params: { question, school: this.selectedCampus2 }
+                            });
+
+                            const referenceAnalysisResponse = await axios.get('http://localhost:3000/api/analysis', {
+                                params: { question, options: correctAnswer }
+                            });
+                            const referenceAnalysis = referenceAnalysisResponse.data.analysis;
+
+                            questionData[question] = {
+                                correctAnswer,
+                                listeningText,
+                                optionCounts1: optionCounts1Response.data.optionCounts,
+                                optionCounts2: optionCounts2Response.data.optionCounts,
+                                optionPercentages1: optionPercentages1Response.data.accuracyRate,
+                                optionPercentages2: optionPercentages2Response.data.accuracyRate,
+                                referenceAnalysis
+                            };
+                            console.log("所需要展示的所有数据", questionData);
+                        }
                     } else if (this.permission === '0') {
                         // 获取选项人数比
                         const optionResponse = await axios.get('http://localhost:3000/api/option-percentages', {
@@ -348,11 +646,33 @@ export default {
 
     created() {
         this.fetchClassOptions();
-    }
+    },
+
+    computed: {  
+    firstOption() {  
+      // 返回一个包含第一个元素的数组，或者如果options为空，则返回一个空数组  
+      return this.options.slice(0, 1);  
+    },  
+
+    secondOption() {  
+      // 返回一个包含第二个元素的数组，或者如果options为空，则返回一个空数组  
+      return this.options.slice(1, 2);  
+    },
+
+    thirdOption() {  
+      // 返回一个包含第一个元素的数组，或者如果options为空，则返回一个空数组  
+      return this.options.slice(2, 3);  
+    },
+  }
 };
 </script>
 
 <style>
+/*学生端错误题号标注*/
+.wrong{
+  color:red;
+}
+
 .highlight-correct {
     background-color: yellow;   /*高亮正确答案*/
 }

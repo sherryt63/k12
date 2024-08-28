@@ -1,7 +1,17 @@
-.header {
+.main{
+  flex-direction: column;
+  height: 90%; /* 高度设置为视口高度 */
+  width: 97%; /*页面居中变小*/
+  margin: 0 auto; 
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.header {  
   display: flex;
-  flex-direction: column; /* 垂直排列 */
-  align-items: center; /* 水平居中对齐 */
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-start;
   width: 100%;
   margin-top: 0;
   margin-bottom: 30px; /* 底部空间与其他内容分开 */
@@ -16,6 +26,7 @@
     color: #CDFDE7; /* 字体颜色 */
     font-size: 24px; /* 字体大小 */
     flex: 1; /* 占用剩余空间 */
+    width: 100%;
   }
   
   .header .class-select {
@@ -33,12 +44,15 @@
     border: 1px solid #aaa; /* 边框颜色，灰色 */
     border-radius: 4px; /* 圆角边框 */
     font-weight: bold; /* 加粗字体 */
+    margin-right: 20px;
   }
   .header .class-select label {
     margin-right: 10px; /* 标签和下拉框之间的间距 */
     color: #CDFDE7;
   }
-  
+  .header .title {
+    width: 100%;
+  }
   .header select {
     font-size: 16px; /* 下拉框字体大小 */
     padding: 8px; /* 下拉框内边距 */
@@ -48,3 +62,34 @@
     border-radius: 4px; /* 圆角边框 */
     font-weight: bold;
   }
+
+  button {
+    color: #ffffff; /* 字体颜色，黑色 */
+    background-color: #6DE4C6; /* 背景颜色，白色 */
+    border: 1px solid #aaa; /* 边框颜色，灰色 */
+    border-radius: 4px; /* 圆角边框 */
+    font-size: 16px;
+    font-weight: bold; /* 加粗字体 */
+    padding: 8px; /* 内边距 */
+    height:40px;
+  }
+
+  /*“返回主页”按钮*/
+  .menu {
+    margin-top: 0;
+    margin-right: 0;
+    display: flex;
+    width: auto;
+    white-space: nowrap;
+    justify-content: center;
+    gap: 20px;
+  }
+  .class-select-container {  
+    display: flex;  
+    flex-direction: column; /* 使内部元素垂直排列 */  
+    align-items: flex-start; /* 让内部元素在容器内靠左或上对齐 */  
+}  
+  
+.compare-type-select, .class-select {  
+    margin-left: 10px; /* 在需要时增加一些左边距 */  
+}
